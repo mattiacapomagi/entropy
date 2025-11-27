@@ -9,6 +9,7 @@ interface AppState {
   
   // Dither Tool Parameters
   ditherStrength: number
+  ditherScale: number
   ditherAlgorithm: number
   brightness: number
   contrast: number
@@ -25,6 +26,7 @@ interface AppState {
   setCurrentTool: (tool: Tool) => void
   setImage: (url: string | null, width: number, height: number) => void
   setDitherStrength: (strength: number) => void
+  setDitherScale: (scale: number) => void
   setDitherAlgorithm: (algorithm: number) => void
   setBrightness: (brightness: number) => void
   setContrast: (contrast: number) => void
@@ -43,13 +45,14 @@ export const useStore = create<AppState>((set) => ({
   imageURL: null,
   imageDimensions: { width: 0, height: 0 },
   
-  ditherStrength: 0.0,
+  ditherStrength: 0.5,
+  ditherScale: 1.0,
   ditherAlgorithm: 2,
-  brightness: 50, // 1-100, 50 neutral
-  contrast: 50,   // 1-100, 50 neutral
-  saturation: 50, // 1-100, 50 neutral
-  gamma: 50,      // 1-100, 50 neutral (approx 1.0)
-  vibrance: 50,   // 1-100, 50 neutral
+  brightness: 50,
+  contrast: 50,
+  saturation: 50,
+  gamma: 50,
+  vibrance: 50,
   aberration: 0.0,
   colorMode: 0,
   tintHue: 20.0,
@@ -60,6 +63,7 @@ export const useStore = create<AppState>((set) => ({
   setCurrentTool: (tool) => set({ currentTool: tool }),
   setImage: (url, width, height) => set({ imageURL: url, imageDimensions: { width, height } }),
   setDitherStrength: (strength) => set({ ditherStrength: strength }),
+  setDitherScale: (scale) => set({ ditherScale: scale }),
   setDitherAlgorithm: (algorithm) => set({ ditherAlgorithm: algorithm }),
   setBrightness: (brightness) => set({ brightness }),
   setContrast: (contrast) => set({ contrast }),

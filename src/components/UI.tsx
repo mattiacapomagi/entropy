@@ -1,5 +1,5 @@
 import { useStore } from '../store'
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { Stage } from './Stage'
 
 const DITHER_ALGORITHMS = [
@@ -21,7 +21,7 @@ const COLOR_MODES = [
 ]
 
 const PALETTE_PRESETS = [
-  // Original 8
+  { name: 'CUSTOM', colors: [] },
   { name: 'COFFEE', colors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'] },
   { name: 'GAMEBOY', colors: ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'] },
   { name: 'CGA', colors: ['#000000', '#55ffff', '#ff55ff', '#ffffff'] },
@@ -30,7 +30,6 @@ const PALETTE_PRESETS = [
   { name: 'MATRIX', colors: ['#000000', '#003b00', '#008f11', '#00ff41'] },
   { name: 'SEPIA', colors: ['#2e1d0e', '#6b4826', '#b08d55', '#e8dcb5'] },
   { name: 'B&W', colors: ['#000000', '#555555', '#aaaaaa', '#ffffff'] },
-  // New 20+
   { name: 'CRIMSON', colors: ['#1a0000', '#4d0000', '#990000', '#ff0000', '#ff6666'] },
   { name: 'OCEAN', colors: ['#001a33', '#003366', '#0066cc', '#3399ff', '#66ccff'] },
   { name: 'FOREST', colors: ['#0d1f0d', '#1a3d1a', '#2d5c2d', '#408040', '#66b366'] },
@@ -64,6 +63,7 @@ export function LabOverlay() {
   const setCurrentTool = useStore((state) => state.setCurrentTool)
   
   const ditherStrength = useStore((state) => state.ditherStrength)
+  const ditherScale = useStore((state) => state.ditherScale)
   const ditherAlgorithm = useStore((state) => state.ditherAlgorithm)
   const brightness = useStore((state) => state.brightness)
   const contrast = useStore((state) => state.contrast)
@@ -76,6 +76,7 @@ export function LabOverlay() {
   const paletteColors = useStore((state) => state.paletteColors)
   
   const setDitherStrength = useStore((state) => state.setDitherStrength)
+  const setDitherScale = useStore((state) => state.setDitherScale)
   const setDitherAlgorithm = useStore((state) => state.setDitherAlgorithm)
   const setBrightness = useStore((state) => state.setBrightness)
   const setContrast = useStore((state) => state.setContrast)
@@ -90,6 +91,8 @@ export function LabOverlay() {
   const setImage = useStore((state) => state.setImage)
   const imageURL = useStore((state) => state.imageURL)
   
+  const [customColorCount, setCustomColorCount] = useState(4)
+  const [selectedPreset, setSelectedPreset] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleExport = useCallback(() => setIsExporting(true), [setIsExporting])
@@ -141,6 +144,15 @@ export function LabOverlay() {
     setPaletteColors(newPalette)
   }, [paletteColors, setPaletteColors])
 
+  const handleCustomColorCountChange = useCallback((count: number) => {
+    setCustomColorCount(count)
+    const newColors = Array(count).fill('#000000').map((_, i) => {
+      if (i < paletteColors.length) return paletteColors[i]
+      return `#${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}`
+    })
+    setPaletteColors(newColors)
+  }, [paletteColors, setPaletteColors])
+
   const handleClearImage = useCallback(() => setImage(null, 0, 0), [setImage])
 
   // MAIN MENU
@@ -180,7 +192,7 @@ export function LabOverlay() {
     )
   }
 
-  // DITHER TOOL - BRUTALIST LAYOUT
+  // DITHER TOOL
   return (
     <div className="absolute inset-0 bg-black">
       <input
@@ -191,8 +203,8 @@ export function LabOverlay() {
         className="hidden"
       />
 
-      {/* HEADER BAR */}
-      <div className="h-20 bg-white border-b-8 border-black flex items-center px-8">
+      {/* HEADER - GRAY INSTEAD OF WHITE */}
+      <div className="h-20 bg-[#ccc] border-b-8 border-black flex items-center px-8">
         <div className="flex items-center gap-8">
           <button
             onClick={() => setCurrentTool('MENU')}
@@ -208,8 +220,8 @@ export function LabOverlay() {
 
       {/* MAIN CONTENT */}
       <div className="absolute top-20 bottom-24 left-0 right-0 flex">
-        {/* SIDEBAR */}
-        <div className="w-96 bg-white border-r-8 border-black overflow-y-auto scrollbar-hide">
+        {/* SIDEBAR - LIGHT GRAY */}
+        <div className="w-96 bg-[#ddd] border-r-8 border-black overflow-y-auto scrollbar-hide">
           <div className="p-6 space-y-6">
             
             {/* COLOR */}
@@ -248,9 +260,17 @@ export function LabOverlay() {
               {colorMode === 3 && (
                 <div className="mt-4 space-y-4">
                   <select
+                    value={selectedPreset}
                     onChange={(e) => {
+                      setSelectedPreset(e.target.value)
                       const preset = PALETTE_PRESETS.find(p => p.name === e.target.value)
-                      if (preset) setPaletteColors(preset.colors)
+                      if (preset) {
+                        if (preset.name === 'CUSTOM') {
+                          handleCustomColorCountChange(4)
+                        } else {
+                          setPaletteColors(preset.colors)
+                        }
+                      }
                     }}
                     className="w-full bg-white text-black border-4 border-black p-3 font-black text-lg uppercase"
                   >
@@ -259,6 +279,23 @@ export function LabOverlay() {
                       <option key={p.name} value={p.name}>{p.name}</option>
                     ))}
                   </select>
+                  
+                  {selectedPreset === 'CUSTOM' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-black uppercase text-sm">COLORS</span>
+                        <select
+                          value={customColorCount}
+                          onChange={(e) => handleCustomColorCountChange(parseInt(e.target.value))}
+                          className="bg-white text-black border-4 border-white p-2 font-black text-sm"
+                        >
+                          {[...Array(12)].map((_, i) => (
+                            <option key={i + 1} value={i + 1}>{i + 1}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="grid grid-cols-4 gap-2">
                     {paletteColors.map((color, index) => (
@@ -323,7 +360,7 @@ export function LabOverlay() {
                 ))}
               </select>
 
-              <div className="mb-1">
+              <div className="mb-3">
                 <div className="flex justify-between mb-1">
                   <span className="font-black uppercase text-sm">STRENGTH</span>
                   <span className="font-black">{ditherStrength.toFixed(2)}</span>
@@ -335,6 +372,22 @@ export function LabOverlay() {
                   step="0.01"
                   value={ditherStrength}
                   onChange={(e) => setDitherStrength(parseFloat(e.target.value))}
+                  className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
+                />
+              </div>
+
+              <div className="mb-1">
+                <div className="flex justify-between mb-1">
+                  <span className="font-black uppercase text-sm">SCALE</span>
+                  <span className="font-black">{ditherScale.toFixed(1)}x</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="4"
+                  step="0.1"
+                  value={ditherScale}
+                  onChange={(e) => setDitherScale(parseFloat(e.target.value))}
                   className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                 />
               </div>
@@ -364,8 +417,8 @@ export function LabOverlay() {
         </div>
       </div>
 
-      {/* FOOTER BAR */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-white border-t-8 border-black flex items-center justify-between px-8">
+      {/* FOOTER - GRAY */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-[#ccc] border-t-8 border-black flex items-center justify-between px-8">
         <div className="flex items-center gap-6">
           <div className={`w-6 h-6 ${imageURL ? 'bg-[#f27200]' : 'bg-black'} border-4 border-black`} />
           <span className="text-black text-2xl font-black uppercase tracking-wider">
@@ -380,7 +433,7 @@ export function LabOverlay() {
           <button
             onClick={handleClearImage}
             disabled={!imageURL}
-            className="bg-white text-black px-8 py-4 border-8 border-black font-black text-xl uppercase tracking-wider hover:bg-black hover:text-white disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-black"
+            className="bg-[#ccc] text-black px-8 py-4 border-8 border-black font-black text-xl uppercase tracking-wider hover:bg-black hover:text-white disabled:opacity-30 disabled:hover:bg-[#ccc] disabled:hover:text-black"
           >
             CLEAR
           </button>

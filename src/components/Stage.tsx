@@ -14,6 +14,7 @@ void main() {
 const fragmentShader = `
 uniform sampler2D uTexture;
 uniform float uDitherStrength;
+uniform float uDitherScale;
 uniform int uDitherAlgorithm;
 uniform float uBrightness;
 uniform float uContrast;
@@ -144,8 +145,8 @@ vec3 getDitheredColor(vec2 uv) {
     float localFract = fract(scaledGray);
     
     if (uDitherStrength > 0.0) {
-       // Use gl_FragCoord instead of ditherCoord
-       vec2 pixelCoord = gl_FragCoord.xy;
+       // Use gl_FragCoord with scale applied
+       vec2 pixelCoord = gl_FragCoord.xy / uDitherScale;
        float threshold = 0.5;
        
        // Algorithms
@@ -164,12 +165,12 @@ vec3 getDitheredColor(vec2 uv) {
        else if (uDitherAlgorithm == 5) { // Halftone Dot (Improved)
           // Scale needs to be related to DPI or just fixed?
           // Let's make it fixed but high freq
-          threshold = halftoneDot(uv, 0.785, 0.2); // 0.2 scale
+          threshold = halftoneDot(uv, 0.785, 0.2 * uDitherScale); // 0.2 scale
           // Clamp to 0-1
           threshold = clamp(threshold, 0.0, 1.0);
        }
        else if (uDitherAlgorithm == 6) { // Halftone Line
-          threshold = halftoneLine(uv, 0.785, 0.3);
+          threshold = halftoneLine(uv, 0.785, 0.3 * uDitherScale);
        }
        else if (uDitherAlgorithm == 7) { // Crosshatch
           float l1 = halftoneLine(uv, 0.785, 0.3);
@@ -189,8 +190,8 @@ vec3 getDitheredColor(vec2 uv) {
   
   // Standard Dithering (for non-palette modes)
   if (uDitherStrength > 0.0 && uColorMode != 3) {
-    // Use gl_FragCoord instead of ditherCoord
-    vec2 pixelCoord = gl_FragCoord.xy;
+    // Use gl_FragCoord with scale applied
+    vec2 pixelCoord = gl_FragCoord.xy / uDitherScale;
     float threshold = 0.5;
     
     if (uDitherAlgorithm == 0) threshold = bayer2x2(pixelCoord);
@@ -206,15 +207,15 @@ vec3 getDitheredColor(vec2 uv) {
       threshold = bayer4x4(rotated);
     }
     else if (uDitherAlgorithm == 5) { // Halftone Dot
-        threshold = halftoneDot(uv, 0.785, 0.2);
+        threshold = halftoneDot(uv, 0.785, 0.2 * uDitherScale);
         threshold = clamp(threshold, 0.0, 1.0);
     }
     else if (uDitherAlgorithm == 6) { // Halftone Line
-        threshold = halftoneLine(uv, 0.785, 0.3);
+        threshold = halftoneLine(uv, 0.785, 0.3 * uDitherScale);
     }
     else if (uDitherAlgorithm == 7) { // Crosshatch
-        float l1 = halftoneLine(uv, 0.785, 0.3);
-        float l2 = halftoneLine(uv, -0.785, 0.3);
+        float l1 = halftoneLine(uv, 0.785, 0.3 * uDitherScale);
+        float l2 = halftoneLine(uv, -0.785, 0.3 * uDitherScale);
         threshold = (l1 + l2) * 0.5;
     }
     
@@ -291,6 +292,7 @@ function ScreenQuad() {
   const { viewport, size, gl, scene, camera } = useThree()
   const imageURL = useStore((state) => state.imageURL)
   const ditherStrength = useStore((state) => state.ditherStrength)
+  const ditherScale = useStore((state) => state.ditherScale)
   const ditherAlgorithm = useStore((state) => state.ditherAlgorithm)
   const brightness = useStore((state) => state.brightness)
   const contrast = useStore((state) => state.contrast)
@@ -337,7 +339,8 @@ function ScreenQuad() {
 
   const [uniforms] = useState(() => ({
     uTexture: { value: null },
-    uDitherStrength: { value: 0.0 },
+    uDitherStrength: { value: 0.5 },
+    uDitherScale: { value: 1.0 },
     uDitherAlgorithm: { value: 2 },
     uBrightness: { value: 0.0 },
     uContrast: { value: 1.0 },
@@ -369,6 +372,7 @@ function ScreenQuad() {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
       materialRef.current.uniforms.uDitherStrength.value = ditherStrength
+      materialRef.current.uniforms.uDitherScale.value = ditherScale
       materialRef.current.uniforms.uDitherAlgorithm.value = ditherAlgorithm
       
       // MAPPING 1-100 to Shader Values
