@@ -1,5 +1,5 @@
 import { useStore } from '../store'
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { Stage } from './Stage'
 
 const DITHER_ALGORITHMS = [
@@ -40,6 +40,45 @@ const PALETTE_PRESETS = [
   { name: 'Candy', colors: ['#2a0928', '#7a1c5d', '#c24285', '#ff9ecf'] },
 ]
 
+// Collapsible Section Component
+function CollapsibleSection({ 
+  title, 
+  children, 
+  defaultOpen = true 
+}: { 
+  title: string
+  children: React.ReactNode
+  defaultOpen?: boolean 
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+  
+  return (
+    <div className="border-b-2 border-gray-800 pb-4">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex justify-between items-center text-[#f27200] text-xs font-bold mb-3 hover:text-white transition-colors uppercase"
+        aria-expanded={isOpen}
+      >
+        <span>/// {title}</span>
+        <span className="text-white text-lg transition-transform duration-200" style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+          ▶
+        </span>
+      </button>
+      <div 
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ 
+          maxHeight: isOpen ? '1000px' : '0',
+          opacity: isOpen ? 1 : 0
+        }}
+      >
+        <div className="space-y-4">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function LabOverlay() {
   const currentTool = useStore((state) => state.currentTool)
   const setCurrentTool = useStore((state) => state.setCurrentTool)
@@ -75,8 +114,8 @@ export function LabOverlay() {
   
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleExport = () => setIsExporting(true)
-  const handleFileClick = () => fileInputRef.current?.click()
+  const handleExport = useCallback(() => setIsExporting(true), [setIsExporting])
+  const handleFileClick = useCallback(() => fileInputRef.current?.click(), [])
 
   const loadImageFile = useCallback((file: File) => {
     if (file.type.startsWith('image/')) {
@@ -89,10 +128,10 @@ export function LabOverlay() {
     }
   }, [setImage])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) loadImageFile(file)
-  }
+  }, [loadImageFile])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -106,7 +145,7 @@ export function LabOverlay() {
     if (file) loadImageFile(file)
   }, [loadImageFile])
 
-  const hueToRGB = (hue: number) => {
+  const hueToRGB = useCallback((hue: number) => {
     const h = hue / 60
     const c = 1
     const x = c * (1 - Math.abs((h % 2) - 1))
@@ -118,13 +157,15 @@ export function LabOverlay() {
     else if (h >= 4 && h < 5) rgb = [x, 0, c]
     else rgb = [c, 0, x]
     return `rgb(${Math.round(rgb[0] * 255)}, ${Math.round(rgb[1] * 255)}, ${Math.round(rgb[2] * 255)})`
-  }
+  }, [])
 
-  const updatePaletteColor = (index: number, color: string) => {
+  const updatePaletteColor = useCallback((index: number, color: string) => {
     const newPalette = [...paletteColors]
     newPalette[index] = color
     setPaletteColors(newPalette)
-  }
+  }, [paletteColors, setPaletteColors])
+
+  const handleClearImage = useCallback(() => setImage(null, 0, 0), [setImage])
 
   // MAIN MENU VIEW
   if (currentTool === 'MENU') {
@@ -137,21 +178,21 @@ export function LabOverlay() {
           <div className="space-y-4">
             <button 
               onClick={() => setCurrentTool('DITHER')}
-              className="w-full bg-white text-black text-2xl font-bold py-4 hover:bg-[#f27200] hover:text-white transition-colors border-4 border-transparent hover:border-white uppercase"
+              className="w-full bg-white text-black text-2xl font-bold py-4 hover:bg-[#f27200] hover:text-white transition-all duration-200 border-4 border-transparent hover:border-white uppercase transform hover:scale-[1.02]"
             >
               [ DITHER TOOL ]
             </button>
             
             <button 
               disabled
-              className="w-full bg-gray-900 text-gray-500 text-2xl font-bold py-4 border-4 border-gray-800 cursor-not-allowed uppercase"
+              className="w-full bg-gray-900 text-gray-500 text-2xl font-bold py-4 border-4 border-gray-800 cursor-not-allowed uppercase opacity-50"
             >
               [ GLITCH TOOL ] (LOCKED)
             </button>
             
             <button 
               disabled
-              className="w-full bg-gray-900 text-gray-500 text-2xl font-bold py-4 border-4 border-gray-800 cursor-not-allowed uppercase"
+              className="w-full bg-gray-900 text-gray-500 text-2xl font-bold py-4 border-4 border-gray-800 cursor-not-allowed uppercase opacity-50"
             >
               [ DATA MOSH ] (LOCKED)
             </button>
@@ -186,11 +227,12 @@ export function LabOverlay() {
         />
 
         {/* Navbar */}
-        <div className="flex justify-between items-center w-full bg-black border-4 border-white p-3 pointer-events-auto mb-4">
+        <div className="flex justify-between items-center w-full bg-black border-4 border-white p-3 pointer-events-auto mb-4 transition-shadow hover:shadow-lg hover:shadow-white/20">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setCurrentTool('MENU')}
-              className="text-sm hover:text-[#f27200] border-r-2 border-white pr-4 mr-2"
+              className="text-sm hover:text-[#f27200] border-r-2 border-white pr-4 mr-2 transition-all duration-200 hover:scale-110"
+              aria-label="Back to menu"
             >
               ◄ MENU
             </button>
@@ -200,7 +242,8 @@ export function LabOverlay() {
           </div>
           <button 
             onClick={handleFileClick}
-            className="bg-white text-black px-4 py-2 border-4 border-black font-bold uppercase hover:bg-[#f27200] hover:text-white transition-colors"
+            className="bg-white text-black px-4 py-2 border-4 border-black font-bold uppercase hover:bg-[#f27200] hover:text-white transition-all duration-200 transform hover:scale-105"
+            aria-label="Upload image"
           >
             [UPLOAD]
           </button>
@@ -213,16 +256,15 @@ export function LabOverlay() {
               ▼ CONTROLS
             </h2>
             
-            {/* --- COLOR SECTION --- */}
-            <div className="space-y-4 border-b-2 border-gray-800 pb-4">
-              <div className="text-[#f27200] text-xs font-bold mb-2">/// COLOR SETTINGS</div>
-              
+            {/* COLOR SETTINGS */}
+            <CollapsibleSection title="Color Settings" defaultOpen={true}>
               <div className="space-y-1">
-                <label className="uppercase text-sm font-bold">Color Mode</label>
+                <label className="uppercase text-sm font-bold block">Color Mode</label>
                 <select
                   value={colorMode}
                   onChange={(e) => setColorMode(parseInt(e.target.value))}
-                  className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200]"
+                  className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200] transition-colors"
+                  aria-label="Color mode"
                 >
                   {COLOR_MODES.map(mode => (
                     <option key={mode.id} value={mode.id}>
@@ -233,11 +275,11 @@ export function LabOverlay() {
               </div>
 
               {colorMode === 2 && (
-                <div className="space-y-1">
+                <div className="space-y-1 animate-fadeIn">
                   <div className="flex justify-between text-sm">
                     <label className="uppercase">Tint Hue</label>
                     <div 
-                      className="w-8 h-4 border-2 border-white" 
+                      className="w-8 h-4 border-2 border-white transition-all" 
                       style={{ backgroundColor: hueToRGB(tintHue) }}
                     />
                   </div>
@@ -248,24 +290,26 @@ export function LabOverlay() {
                     step="1"
                     value={tintHue}
                     onChange={(e) => setTintHue(parseFloat(e.target.value))}
-                    className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                    className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
                     style={{
                       background: `linear-gradient(to right, rgb(255,0,0), rgb(255,255,0), rgb(0,255,0), rgb(0,255,255), rgb(0,0,255), rgb(255,0,255), rgb(255,0,0))`
                     }}
+                    aria-label="Tint hue"
                   />
                 </div>
               )}
 
               {colorMode === 3 && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-fadeIn">
                   <div className="space-y-1">
-                    <label className="uppercase text-sm font-bold">Presets</label>
+                    <label className="uppercase text-sm font-bold block">Presets</label>
                     <select
                       onChange={(e) => {
                         const preset = PALETTE_PRESETS.find(p => p.name === e.target.value)
                         if (preset) setPaletteColors(preset.colors)
                       }}
-                      className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200]"
+                      className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200] transition-colors"
+                      aria-label="Palette presets"
                     >
                       <option value="">-- Select Preset --</option>
                       {PALETTE_PRESETS.map(p => (
@@ -275,7 +319,7 @@ export function LabOverlay() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="uppercase text-sm font-bold">Palette (Dark → Light)</label>
+                    <label className="uppercase text-sm font-bold block">Palette (Dark → Light)</label>
                     <div className="flex justify-between gap-2">
                       {paletteColors.map((color, index) => (
                         <div key={index} className="flex flex-col items-center gap-1 w-full">
@@ -283,7 +327,8 @@ export function LabOverlay() {
                             type="color"
                             value={color}
                             onChange={(e) => updatePaletteColor(index, e.target.value)}
-                            className="w-full h-8 p-0 border-2 border-white bg-black cursor-pointer"
+                            className="w-full h-8 p-0 border-2 border-white bg-black cursor-pointer transition-transform hover:scale-110"
+                            aria-label={`Palette color ${index + 1}`}
                           />
                           <span className="text-[10px] uppercase text-gray-400">{index + 1}</span>
                         </div>
@@ -292,16 +337,14 @@ export function LabOverlay() {
                   </div>
                 </div>
               )}
-            </div>
+            </CollapsibleSection>
 
-            {/* --- IMAGE ADJUSTMENTS --- */}
-            <div className="space-y-4 border-b-2 border-gray-800 pb-4">
-              <div className="text-[#f27200] text-xs font-bold mb-2">/// IMAGE ADJUSTMENTS</div>
-              
+            {/* IMAGE ADJUSTMENTS */}
+            <CollapsibleSection title="Image Adjustments" defaultOpen={false}>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Brightness</label>
-                  <span className="text-[#f27200]">{brightness}</span>
+                  <span className="text-[#f27200] font-bold">{brightness}</span>
                 </div>
                 <input
                   type="range"
@@ -310,14 +353,15 @@ export function LabOverlay() {
                   step="1"
                   value={brightness}
                   onChange={(e) => setBrightness(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Brightness"
                 />
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Contrast</label>
-                  <span className="text-[#f27200]">{contrast}</span>
+                  <span className="text-[#f27200] font-bold">{contrast}</span>
                 </div>
                 <input
                   type="range"
@@ -326,14 +370,15 @@ export function LabOverlay() {
                   step="1"
                   value={contrast}
                   onChange={(e) => setContrast(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Contrast"
                 />
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Gamma</label>
-                  <span className="text-[#f27200]">{gamma}</span>
+                  <span className="text-[#f27200] font-bold">{gamma}</span>
                 </div>
                 <input
                   type="range"
@@ -342,14 +387,15 @@ export function LabOverlay() {
                   step="1"
                   value={gamma}
                   onChange={(e) => setGamma(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Gamma"
                 />
               </div>
               
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Saturation</label>
-                  <span className="text-[#f27200]">{saturation}</span>
+                  <span className="text-[#f27200] font-bold">{saturation}</span>
                 </div>
                 <input
                   type="range"
@@ -358,14 +404,15 @@ export function LabOverlay() {
                   step="1"
                   value={saturation}
                   onChange={(e) => setSaturation(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Saturation"
                 />
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Vibrance</label>
-                  <span className="text-[#f27200]">{vibrance}</span>
+                  <span className="text-[#f27200] font-bold">{vibrance}</span>
                 </div>
                 <input
                   type="range"
@@ -374,14 +421,15 @@ export function LabOverlay() {
                   step="1"
                   value={vibrance}
                   onChange={(e) => setVibrance(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Vibrance"
                 />
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Aberration</label>
-                  <span className="text-[#f27200]">{aberration.toFixed(2)}</span>
+                  <span className="text-[#f27200] font-bold">{aberration.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -390,21 +438,21 @@ export function LabOverlay() {
                   step="0.01"
                   value={aberration}
                   onChange={(e) => setAberration(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Chromatic aberration"
                 />
               </div>
-            </div>
+            </CollapsibleSection>
 
-            {/* --- DITHERING --- */}
-            <div className="space-y-4">
-              <div className="text-[#f27200] text-xs font-bold mb-2">/// DITHERING</div>
-
+            {/* DITHERING */}
+            <CollapsibleSection title="Dithering" defaultOpen={true}>
               <div className="space-y-1">
-                <label className="uppercase text-sm font-bold">Algorithm</label>
+                <label className="uppercase text-sm font-bold block">Algorithm</label>
                 <select
                   value={ditherAlgorithm}
                   onChange={(e) => setDitherAlgorithm(parseInt(e.target.value))}
-                  className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200]"
+                  className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200] transition-colors"
+                  aria-label="Dithering algorithm"
                 >
                   {DITHER_ALGORITHMS.map(algo => (
                     <option key={algo.id} value={algo.id}>
@@ -417,7 +465,7 @@ export function LabOverlay() {
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <label className="uppercase">Strength</label>
-                  <span className="text-[#f27200]">{ditherStrength.toFixed(2)}</span>
+                  <span className="text-[#f27200] font-bold">{ditherStrength.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -426,27 +474,35 @@ export function LabOverlay() {
                   step="0.01"
                   value={ditherStrength}
                   onChange={(e) => setDitherStrength(parseFloat(e.target.value))}
-                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                  aria-label="Dithering strength"
                 />
               </div>
-            </div>
+            </CollapsibleSection>
           </div>
 
-          {/* --- CANVAS AREA --- */}
+          {/* CANVAS AREA */}
           {!imageURL ? (
             <div
               onClick={handleFileClick}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+              className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 transition-all duration-300 cursor-pointer group"
+              role="button"
+              tabIndex={0}
+              aria-label="Upload image area"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/50 mb-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-              <p className="text-white/50 text-center font-mono text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/50 mb-4 group-hover:text-white/70 transition-colors group-hover:scale-110 transform duration-200">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" x2="12" y1="3" y2="15"/>
+              </svg>
+              <p className="text-white/50 text-center font-mono text-sm group-hover:text-white/70 transition-colors">
                 DRAG & DROP OR CLICK TO UPLOAD
               </p>
             </div>
           ) : (
-            <div className="flex-1 relative border-4 border-white overflow-hidden flex flex-col bg-[#111]">
+            <div className="flex-1 relative border-4 border-white overflow-hidden flex flex-col bg-[#111] transition-shadow hover:shadow-lg hover:shadow-white/20">
               {/* Transparency Grid Background */}
               <div 
                 className="absolute inset-0 opacity-20 pointer-events-none"
@@ -467,22 +523,25 @@ export function LabOverlay() {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center w-full bg-black border-4 border-white p-3 pointer-events-auto mt-4">
-          <div className="text-sm">
+        <div className="flex justify-between items-center w-full bg-black border-4 border-white p-3 pointer-events-auto mt-4 transition-shadow hover:shadow-lg hover:shadow-white/20">
+          <div className="text-sm flex items-center gap-2">
+            <span className={`inline-block w-2 h-2 ${imageURL ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
             {imageURL ? '■ IMAGE LOADED' : '□ NO IMAGE'}
           </div>
           <div className="flex gap-4">
             <button 
-              onClick={() => setImage(null, 0, 0)}
+              onClick={handleClearImage}
               disabled={!imageURL}
-              className="bg-black text-white px-6 py-2 border-4 border-white font-bold uppercase hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-black text-white px-6 py-2 border-4 border-white font-bold uppercase hover:bg-white hover:text-black transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100"
+              aria-label="Clear image"
             >
               [CLEAR]
             </button>
             <button 
               onClick={handleExport}
               disabled={!imageURL}
-              className="bg-[#f27200] text-white px-6 py-2 border-4 border-white font-bold uppercase hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#f27200] text-white px-6 py-2 border-4 border-white font-bold uppercase hover:bg-white hover:text-black transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100"
+              aria-label="Download processed image"
             >
               [DOWNLOAD] 
             </button>
