@@ -11,7 +11,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: "Science Gothic", "Arial", sans-serif;
+  font-family: "IBM Plex Mono", "Courier New", monospace;
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

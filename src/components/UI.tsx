@@ -166,21 +166,21 @@ export function LabOverlay() {
           <div className="space-y-6">
             <button 
               onClick={() => setCurrentTool('DITHER')}
-              className="w-full bg-white text-black text-4xl font-black py-8 hover:bg-[#f27200] hover:text-white border-8 border-black uppercase tracking-wider"
+              className="w-full bg-white text-black text-4xl font-black py-8 hover:bg-[#f27200] hover:text-white border-4 border-black uppercase tracking-wider"
             >
               DITHER TOOL
             </button>
             
             <button 
               disabled
-              className="w-full bg-black text-white/30 text-4xl font-black py-8 border-8 border-white/30 cursor-not-allowed uppercase tracking-wider"
+              className="w-full bg-black text-white/30 text-4xl font-black py-8 border-4 border-white/30 cursor-not-allowed uppercase tracking-wider"
             >
               GLITCH [LOCKED]
             </button>
             
             <button 
               disabled
-              className="w-full bg-black text-white/30 text-4xl font-black py-8 border-8 border-white/30 cursor-not-allowed uppercase tracking-wider"
+              className="w-full bg-black text-white/30 text-4xl font-black py-8 border-4 border-white/30 cursor-not-allowed uppercase tracking-wider"
             >
               DATAMOSH [LOCKED]
             </button>
@@ -223,7 +223,7 @@ export function LabOverlay() {
           <div className="p-6 space-y-6">
             
             {/* COLOR */}
-            <div className="border-8 border-[#f27200] p-4 bg-black text-white">
+            <div className="border-4 border-[#f27200] p-4 bg-black text-white">
               <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#f27200] pb-2">
                 COLOR
               </div>
@@ -311,7 +311,7 @@ export function LabOverlay() {
             </div>
 
             {/* ADJUST */}
-            <div className="border-8 border-[#f27200] p-4 bg-black text-white">
+            <div className="border-4 border-[#f27200] p-4 bg-black text-white">
               <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#f27200] pb-2">
                 ADJUST
               </div>
@@ -342,7 +342,7 @@ export function LabOverlay() {
             </div>
 
             {/* DITHER */}
-            <div className="border-8 border-[#f27200] p-4 bg-[#f27200] text-black">
+            <div className="border-4 border-[#f27200] p-4 bg-[#f27200] text-black">
               <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-black pb-2">
                 DITHER
               </div>
@@ -400,7 +400,7 @@ export function LabOverlay() {
               onClick={handleFileClick}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="absolute inset-0 flex flex-col items-center justify-center border-8 border-dashed border-[#f27200]/30 m-16 cursor-pointer hover:border-[#f27200]"
+              className="absolute inset-0 flex flex-col items-center justify-center border-4 border-dashed border-[#f27200]/30 m-16 cursor-pointer hover:border-[#f27200]"
             >
               <div className="text-[#f27200] text-6xl font-black mb-8">↑</div>
               <div className="text-[#f27200] text-3xl font-black uppercase tracking-widest">DROP IMAGE</div>
@@ -430,14 +430,14 @@ export function LabOverlay() {
           <button
             onClick={handleClearImage}
             disabled={!imageURL}
-            className="bg-black text-white px-8 py-4 border-8 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
+            className="bg-black text-white px-8 py-4 border-4 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
           >
             CLEAR
           </button>
           <button
             onClick={handleExport}
             disabled={!imageURL}
-            className="bg-[#f27200] text-black px-8 py-4 border-8 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
+            className="bg-[#f27200] text-black px-8 py-4 border-4 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
           >
             DOWNLOAD
           </button>
