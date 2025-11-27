@@ -11,7 +11,7 @@
 /* Custom Cursor - Desktop Only */
 @media (pointer: fine) {
   body {
-    cursor: url("/src/assets/cursor-large.svg") 1000 700, auto;
+    cursor: url("/src/assets/cursor-large.svg") 250 175, auto;
   }
 
   a,
@@ -20,7 +20,7 @@
   select,
   [role="button"],
   .cursor-pointer {
-    cursor: url("/src/assets/pointer-large.svg") 900 800, pointer;
+    cursor: url("/src/assets/pointer-large.svg") 225 200, pointer;
   }
 }
 
