@@ -156,17 +156,17 @@ export function LabOverlay() {
   // MAIN MENU
   if (currentTool === 'MENU') {
     return (
-      <div className="absolute inset-0 bg-black flex items-center justify-center text-white">
-        <div className="border-[16px] border-white p-16 max-w-3xl w-full">
-          <h1 className="text-8xl font-black mb-4 tracking-tight uppercase">ENTROPY</h1>
-          <div className="text-[#f27200] text-3xl mb-16 tracking-widest font-black uppercase border-b-8 border-[#f27200] pb-4">
+      <div className="absolute inset-0 bg-black flex items-center justify-center text-white p-4">
+        <div className="border-[8px] md:border-[16px] border-white p-8 md:p-16 max-w-3xl w-full">
+          <h1 className="text-5xl md:text-8xl font-black mb-4 tracking-tight uppercase">ENTROPY</h1>
+          <div className="text-[#f27200] text-xl md:text-3xl mb-8 md:mb-16 tracking-widest font-black uppercase border-b-4 md:border-b-8 border-[#f27200] pb-4">
             SYSTEM v2.0
           </div>
           
           <div className="space-y-6">
             <button 
               onClick={() => setCurrentTool('DITHER')}
-              className="w-full bg-white text-black text-4xl font-black py-8 hover:bg-[#f27200] hover:text-white border-4 border-black uppercase tracking-wider"
+              className="w-full bg-white text-black text-2xl md:text-4xl font-black py-4 md:py-8 hover:bg-[#f27200] hover:text-white border-2 md:border-4 border-black uppercase tracking-wider"
             >
               DITHER TOOL
             </button>
@@ -202,24 +202,45 @@ export function LabOverlay() {
       />
 
       {/* HEADER - BLACK */}
-      <div className="h-16 bg-black border-b-2 border-[#f27200] flex items-center px-6">
-        <div className="flex items-center gap-6">
+      <div className="h-14 md:h-16 bg-black border-b-2 border-[#f27200] flex items-center px-4 md:px-6">
+        <div className="flex items-center gap-4 md:gap-6">
           <button
             onClick={() => setCurrentTool('MENU')}
-            className="text-white text-lg font-bold uppercase tracking-wider hover:text-[#f27200]"
+            className="text-white text-base md:text-lg font-bold uppercase tracking-wider hover:text-[#f27200]"
           >
             ◄ MENU
           </button>
-          <div className="text-[#f27200] text-xl font-bold uppercase tracking-widest">
-            ENTROPY / DITHER
+          <div className="text-[#f27200] text-lg md:text-xl font-bold uppercase tracking-widest">
+            ENTROPY
           </div>
         </div>
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="absolute top-16 bottom-20 left-0 right-0 flex">
-        {/* SIDEBAR - BLACK */}
-        <div className="w-80 bg-black border-r-2 border-[#f27200] overflow-y-auto scrollbar-hide">
+      <div className="absolute top-14 md:top-16 bottom-16 md:bottom-20 left-0 right-0 flex flex-col md:flex-row">
+        
+        {/* PREVIEW AREA (Top on mobile, Right on desktop) */}
+        <div className="flex-1 relative bg-black order-1 md:order-2 h-[40%] md:h-auto border-b-2 md:border-b-0 border-[#f27200] md:border-none">
+          {!imageURL ? (
+            <div
+              onClick={handleFileClick}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-[#f27200]/30 m-8 md:m-12 cursor-pointer hover:border-[#f27200]"
+            >
+              <div className="text-[#f27200] text-4xl md:text-5xl font-bold mb-4 md:mb-6">↑</div>
+              <div className="text-[#f27200] text-xl md:text-2xl font-bold uppercase tracking-widest">DROP IMAGE</div>
+              <div className="text-[#f27200]/50 text-base md:text-lg font-bold uppercase mt-2 md:mt-3">OR CLICK</div>
+            </div>
+          ) : (
+            <div className="absolute inset-0">
+              <Stage />
+            </div>
+          )}
+        </div>
+
+        {/* SIDEBAR - BLACK (Bottom on mobile, Left on desktop) */}
+        <div className="w-full md:w-80 h-[60%] md:h-auto bg-black border-r-0 md:border-r-2 border-[#f27200] overflow-y-auto scrollbar-hide order-2 md:order-1">
           <div className="p-4 space-y-4">
             
             {/* COLOR */}
@@ -393,53 +414,38 @@ export function LabOverlay() {
           </div>
         </div>
 
-        {/* PREVIEW AREA */}
-        <div className="flex-1 relative bg-black">
-          {!imageURL ? (
-            <div
-              onClick={handleFileClick}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-[#f27200]/30 m-12 cursor-pointer hover:border-[#f27200]"
-            >
-              <div className="text-[#f27200] text-5xl font-bold mb-6">↑</div>
-              <div className="text-[#f27200] text-2xl font-bold uppercase tracking-widest">DROP IMAGE</div>
-              <div className="text-[#f27200]/50 text-lg font-bold uppercase mt-3">OR CLICK</div>
-            </div>
-          ) : (
-            <div className="absolute inset-0">
-              <Stage />
-            </div>
-          )}
-        </div>
+
       </div>
 
       {/* FOOTER - BLACK */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-black border-t-2 border-[#f27200] flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
-          <div className={`w-5 h-5 ${imageURL ? 'bg-[#f27200]' : 'bg-[#333]'} border-2 border-[#f27200]`} />
-          <span className="text-white text-lg font-bold uppercase tracking-wider">
+      <div className="absolute bottom-0 left-0 right-0 h-16 md:h-20 bg-black border-t-2 border-[#f27200] flex items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className={`w-4 h-4 md:w-5 md:h-5 ${imageURL ? 'bg-[#f27200]' : 'bg-[#333]'} border-2 border-[#f27200]`} />
+          <span className="text-white text-sm md:text-lg font-bold uppercase tracking-wider hidden md:inline">
             {imageURL ? 'IMAGE LOADED' : 'NO IMAGE'}
           </span>
-          <span className="text-white/30 text-xs font-normal ml-3">
-            © MATTIA CAPOMAGI 2025
+          <span className="text-white text-sm md:text-lg font-bold uppercase tracking-wider md:hidden">
+            {imageURL ? 'LOADED' : 'EMPTY'}
+          </span>
+          <span className="text-white/30 text-[10px] md:text-xs font-normal ml-2 md:ml-3">
+            © 2025
           </span>
         </div>
         
-        <div className="flex gap-6">
+        <div className="flex gap-3 md:gap-6">
           <button
             onClick={handleClearImage}
             disabled={!imageURL}
-            className="bg-black text-white px-6 py-3 border-2 border-[#f27200] font-bold text-lg uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
+            className="bg-black text-white px-4 py-2 md:px-6 md:py-3 border-2 border-[#f27200] font-bold text-sm md:text-lg uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
           >
             CLEAR
           </button>
           <button
             onClick={handleExport}
             disabled={!imageURL}
-            className="bg-[#f27200] text-black px-6 py-3 border-2 border-[#f27200] font-bold text-lg uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
+            className="bg-[#f27200] text-black px-4 py-2 md:px-6 md:py-3 border-2 border-[#f27200] font-bold text-sm md:text-lg uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
           >
-            DOWNLOAD
+            SAVE
           </button>
         </div>
       </div>
