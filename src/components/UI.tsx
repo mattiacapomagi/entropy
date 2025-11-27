@@ -302,7 +302,15 @@ export function LabOverlay() {
                 <div className="mt-4">
                   <div className="flex justify-between mb-1.5">
                     <span className="font-medium uppercase text-xs">HUE</span>
-                    <div className="w-10 h-5 border-2 border-[#f27200]" style={{ backgroundColor: hueToRGB(tintHue) }} />
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setTintHue(20)}
+                        className="text-[10px] font-bold uppercase text-[#f27200] hover:text-white"
+                      >
+                        RESET
+                      </button>
+                      <div className="w-10 h-5 border-2 border-[#f27200]" style={{ backgroundColor: hueToRGB(tintHue) }} />
+                    </div>
                   </div>
                   <input
                     type="range"
@@ -377,20 +385,29 @@ export function LabOverlay() {
               </div>
               
               {[
-                { label: 'BRIGHTNESS', value: brightness, setter: setBrightness, min: 0, max: 200 },
-                { label: 'CONTRAST', value: contrast, setter: setContrast, min: 0, max: 200 },
-                { label: 'SHADOWS', value: shadows, setter: setShadows, min: 0, max: 200 },
-                { label: 'LIGHTS', value: highlights, setter: setHighlights, min: 0, max: 200 },
-                { label: 'BLACKS', value: blacks, setter: setBlacks, min: 0, max: 200 },
-                { label: 'WHITES', value: whites, setter: setWhites, min: 0, max: 200 },
-                { label: 'GAMMA', value: gamma, setter: setGamma, min: 0, max: 200 },
-                { label: 'SATURATION', value: saturation, setter: setSaturation, min: 0, max: 200 },
-                { label: 'VIBRANCE', value: vibrance, setter: setVibrance, min: 0, max: 200 },
-              ].map(({ label, value, setter, min, max }) => (
+                { label: 'BRIGHTNESS', value: brightness, setter: setBrightness, min: 0, max: 200, def: 100 },
+                { label: 'CONTRAST', value: contrast, setter: setContrast, min: 0, max: 200, def: 100 },
+                { label: 'SHADOWS', value: shadows, setter: setShadows, min: 0, max: 200, def: 100 },
+                { label: 'LIGHTS', value: highlights, setter: setHighlights, min: 0, max: 200, def: 100 },
+                { label: 'BLACKS', value: blacks, setter: setBlacks, min: 0, max: 200, def: 100 },
+                { label: 'WHITES', value: whites, setter: setWhites, min: 0, max: 200, def: 100 },
+                { label: 'GAMMA', value: gamma, setter: setGamma, min: 0, max: 200, def: 100 },
+                { label: 'SATURATION', value: saturation, setter: setSaturation, min: 0, max: 200, def: 100 },
+                { label: 'VIBRANCE', value: vibrance, setter: setVibrance, min: 0, max: 200, def: 100 },
+              ].map(({ label, value, setter, min, max, def }) => (
                 <div key={label} className="mb-3">
                   <div className="flex justify-between mb-1">
                     <span className="font-medium uppercase text-xs">{label}</span>
-                    <span className="text-[#f27200] font-semibold text-sm">{typeof value === 'number' ? value.toFixed(0) : value}</span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setter(def)}
+                        className="text-[10px] font-bold uppercase text-[#f27200] hover:text-white"
+                        style={{ opacity: value === def ? 0 : 1, pointerEvents: value === def ? 'none' : 'auto' }}
+                      >
+                        RESET
+                      </button>
+                      <span className="text-[#f27200] font-semibold text-sm w-8 text-right">{typeof value === 'number' ? value.toFixed(0) : value}</span>
+                    </div>
                   </div>
                   <input
                     type="range"
@@ -424,7 +441,16 @@ export function LabOverlay() {
               <div className="mb-2">
                 <div className="flex justify-between mb-1">
                   <span className="font-medium uppercase text-xs">STRENGTH</span>
-                  <span className="font-semibold text-sm">{ditherStrength.toFixed(2)}</span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setDitherStrength(0.5)}
+                      className="text-[10px] font-bold uppercase text-black hover:text-white"
+                      style={{ opacity: ditherStrength === 0.5 ? 0 : 1, pointerEvents: ditherStrength === 0.5 ? 'none' : 'auto' }}
+                    >
+                      RESET
+                    </button>
+                    <span className="font-semibold text-sm w-8 text-right">{ditherStrength.toFixed(2)}</span>
+                  </div>
                 </div>
                 <input
                   type="range"
@@ -440,7 +466,16 @@ export function LabOverlay() {
               <div className="mb-1">
                 <div className="flex justify-between mb-1">
                   <span className="font-medium uppercase text-xs">SCALE</span>
-                  <span className="font-semibold text-sm">{ditherScale.toFixed(1)}x</span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setDitherScale(1.0)}
+                      className="text-[10px] font-bold uppercase text-black hover:text-white"
+                      style={{ opacity: ditherScale === 1.0 ? 0 : 1, pointerEvents: ditherScale === 1.0 ? 'none' : 'auto' }}
+                    >
+                      RESET
+                    </button>
+                    <span className="font-semibold text-sm w-8 text-right">{ditherScale.toFixed(1)}x</span>
+                  </div>
                 </div>
                 <input
                   type="range"
