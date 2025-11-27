@@ -202,36 +202,36 @@ export function LabOverlay() {
       />
 
       {/* HEADER - BLACK */}
-      <div className="h-20 bg-black border-b-8 border-[#f27200] flex items-center px-8">
-        <div className="flex items-center gap-8">
+      <div className="h-16 bg-black border-b-2 border-[#f27200] flex items-center px-6">
+        <div className="flex items-center gap-6">
           <button
             onClick={() => setCurrentTool('MENU')}
-            className="text-white text-2xl font-black uppercase tracking-wider hover:text-[#f27200]"
+            className="text-white text-lg font-bold uppercase tracking-wider hover:text-[#f27200]"
           >
             ◄ MENU
           </button>
-          <div className="text-[#f27200] text-3xl font-black uppercase tracking-widest">
+          <div className="text-[#f27200] text-xl font-bold uppercase tracking-widest">
             ENTROPY / DITHER
           </div>
         </div>
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="absolute top-20 bottom-24 left-0 right-0 flex">
+      <div className="absolute top-16 bottom-20 left-0 right-0 flex">
         {/* SIDEBAR - BLACK */}
-        <div className="w-96 bg-black border-r-8 border-[#f27200] overflow-y-auto scrollbar-hide">
-          <div className="p-6 space-y-6">
+        <div className="w-80 bg-black border-r-2 border-[#f27200] overflow-y-auto scrollbar-hide">
+          <div className="p-4 space-y-4">
             
             {/* COLOR */}
-            <div className="border-4 border-[#f27200] p-4 bg-black text-white">
-              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#f27200] pb-2">
+            <div className="border-2 border-[#f27200] p-3 bg-black text-white">
+              <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-[#f27200] pb-2">
                 COLOR
               </div>
               
               <select
                 value={colorMode}
                 onChange={(e) => setColorMode(parseInt(e.target.value))}
-                className="w-full bg-[#f27200] text-black border-4 border-[#f27200] p-3 font-black text-lg uppercase"
+                className="w-full bg-[#f27200] text-black border-2 border-[#f27200] p-2 font-bold text-sm uppercase"
               >
                 {COLOR_MODES.map(mode => (
                   <option key={mode.id} value={mode.id}>{mode.name}</option>
@@ -240,9 +240,9 @@ export function LabOverlay() {
 
               {colorMode === 2 && (
                 <div className="mt-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="font-semibold uppercase text-sm">HUE</span>
-                    <div className="w-12 h-6 border-4 border-[#f27200]" style={{ backgroundColor: hueToRGB(tintHue) }} />
+                  <div className="flex justify-between mb-1.5">
+                    <span className="font-medium uppercase text-xs">HUE</span>
+                    <div className="w-10 h-5 border-2 border-[#f27200]" style={{ backgroundColor: hueToRGB(tintHue) }} />
                   </div>
                   <input
                     type="range"
@@ -250,7 +250,7 @@ export function LabOverlay() {
                     max="360"
                     value={tintHue}
                     onChange={(e) => setTintHue(parseFloat(e.target.value))}
-                    className="w-full h-8 appearance-none bg-[#333] border-4 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
+                    className="w-full h-6 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />
                 </div>
               )}
@@ -270,7 +270,7 @@ export function LabOverlay() {
                         }
                       }
                     }}
-                    className="w-full bg-[#f27200] text-black border-4 border-[#f27200] p-3 font-black text-lg uppercase"
+                    className="w-full bg-[#f27200] text-black border-2 border-[#f27200] p-2 font-bold text-sm uppercase"
                   >
                     <option value="">SELECT PRESET</option>
                     {PALETTE_PRESETS.map(p => (
@@ -285,7 +285,7 @@ export function LabOverlay() {
                         <select
                           value={customColorCount}
                           onChange={(e) => handleCustomColorCountChange(parseInt(e.target.value))}
-                          className="bg-[#f27200] text-black border-4 border-[#f27200] p-2 font-black text-sm"
+                          className="bg-[#f27200] text-black border-2 border-[#f27200] p-1.5 font-bold text-xs"
                         >
                           {[...Array(12)].map((_, i) => (
                             <option key={i + 1} value={i + 1}>{i + 1}</option>
@@ -302,7 +302,7 @@ export function LabOverlay() {
                         type="color"
                         value={color}
                         onChange={(e) => updatePaletteColor(index, e.target.value)}
-                        className="w-full h-16 border-4 border-[#f27200] cursor-pointer"
+                        className="w-full h-12 border-2 border-[#f27200] cursor-pointer"
                       />
                     ))}
                   </div>
@@ -311,8 +311,8 @@ export function LabOverlay() {
             </div>
 
             {/* ADJUST */}
-            <div className="border-4 border-[#f27200] p-4 bg-black text-white">
-              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#f27200] pb-2">
+            <div className="border-2 border-[#f27200] p-3 bg-black text-white">
+              <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-[#f27200] pb-2">
                 ADJUST
               </div>
               
@@ -325,8 +325,8 @@ export function LabOverlay() {
               ].map(({ label, value, setter, min, max }) => (
                 <div key={label} className="mb-3">
                   <div className="flex justify-between mb-1">
-                    <span className="font-semibold uppercase text-sm">{label}</span>
-                    <span className="text-[#f27200] font-bold">{typeof value === 'number' ? value.toFixed(0) : value}</span>
+                    <span className="font-medium uppercase text-xs">{label}</span>
+                    <span className="text-[#f27200] font-semibold text-sm">{typeof value === 'number' ? value.toFixed(0) : value}</span>
                   </div>
                   <input
                     type="range"
@@ -335,32 +335,32 @@ export function LabOverlay() {
                     step={1}
                     value={value}
                     onChange={(e) => setter(parseFloat(e.target.value))}
-                    className="w-full h-6 appearance-none bg-[#333] border-4 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
+                    className="w-full h-5 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />
                 </div>
               ))}
             </div>
 
             {/* DITHER */}
-            <div className="border-4 border-[#f27200] p-4 bg-[#f27200] text-black">
-              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-black pb-2">
+            <div className="border-2 border-[#f27200] p-3 bg-[#f27200] text-black">
+              <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-black pb-2">
                 DITHER
               </div>
               
               <select
                 value={ditherAlgorithm}
                 onChange={(e) => setDitherAlgorithm(parseInt(e.target.value))}
-                className="w-full bg-black text-white border-4 border-black p-3 font-black text-lg uppercase mb-4"
+                className="w-full bg-black text-white border-2 border-black p-2 font-bold text-sm uppercase mb-3"
               >
                 {DITHER_ALGORITHMS.map(algo => (
                   <option key={algo.id} value={algo.id}>{algo.name}</option>
                 ))}
               </select>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <div className="flex justify-between mb-1">
-                  <span className="font-semibold uppercase text-sm">STRENGTH</span>
-                  <span className="font-bold">{ditherStrength.toFixed(2)}</span>
+                  <span className="font-medium uppercase text-xs">STRENGTH</span>
+                  <span className="font-semibold text-sm">{ditherStrength.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -375,8 +375,8 @@ export function LabOverlay() {
 
               <div className="mb-1">
                 <div className="flex justify-between mb-1">
-                  <span className="font-semibold uppercase text-sm">SCALE</span>
-                  <span className="font-bold">{ditherScale.toFixed(1)}x</span>
+                  <span className="font-medium uppercase text-xs">SCALE</span>
+                  <span className="font-semibold text-sm">{ditherScale.toFixed(1)}x</span>
                 </div>
                 <input
                   type="range"
@@ -400,11 +400,11 @@ export function LabOverlay() {
               onClick={handleFileClick}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="absolute inset-0 flex flex-col items-center justify-center border-4 border-dashed border-[#f27200]/30 m-16 cursor-pointer hover:border-[#f27200]"
+              className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-[#f27200]/30 m-12 cursor-pointer hover:border-[#f27200]"
             >
-              <div className="text-[#f27200] text-6xl font-black mb-8">↑</div>
-              <div className="text-[#f27200] text-3xl font-black uppercase tracking-widest">DROP IMAGE</div>
-              <div className="text-[#f27200]/50 text-xl font-black uppercase mt-4">OR CLICK</div>
+              <div className="text-[#f27200] text-5xl font-bold mb-6">↑</div>
+              <div className="text-[#f27200] text-2xl font-bold uppercase tracking-widest">DROP IMAGE</div>
+              <div className="text-[#f27200]/50 text-lg font-bold uppercase mt-3">OR CLICK</div>
             </div>
           ) : (
             <div className="absolute inset-0">
@@ -415,13 +415,13 @@ export function LabOverlay() {
       </div>
 
       {/* FOOTER - BLACK */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-black border-t-8 border-[#f27200] flex items-center justify-between px-8">
-        <div className="flex items-center gap-6">
-          <div className={`w-6 h-6 ${imageURL ? 'bg-[#f27200]' : 'bg-[#333]'} border-4 border-[#f27200]`} />
-          <span className="text-white text-2xl font-black uppercase tracking-wider">
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-black border-t-2 border-[#f27200] flex items-center justify-between px-6">
+        <div className="flex items-center gap-4">
+          <div className={`w-5 h-5 ${imageURL ? 'bg-[#f27200]' : 'bg-[#333]'} border-2 border-[#f27200]`} />
+          <span className="text-white text-lg font-bold uppercase tracking-wider">
             {imageURL ? 'IMAGE LOADED' : 'NO IMAGE'}
           </span>
-          <span className="text-white/30 text-xs font-normal ml-4">
+          <span className="text-white/30 text-xs font-normal ml-3">
             © MATTIA CAPOMAGI 2025
           </span>
         </div>
@@ -430,14 +430,14 @@ export function LabOverlay() {
           <button
             onClick={handleClearImage}
             disabled={!imageURL}
-            className="bg-black text-white px-8 py-4 border-4 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
+            className="bg-black text-white px-6 py-3 border-2 border-[#f27200] font-bold text-lg uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
           >
             CLEAR
           </button>
           <button
             onClick={handleExport}
             disabled={!imageURL}
-            className="bg-[#f27200] text-black px-8 py-4 border-4 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
+            className="bg-[#f27200] text-black px-6 py-3 border-2 border-[#f27200] font-bold text-lg uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
           >
             DOWNLOAD
           </button>
