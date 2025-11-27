@@ -416,16 +416,9 @@ export function LabOverlay() {
 
       {/* FOOTER - BLACK */}
       <div className="absolute bottom-0 left-0 right-0 h-16 md:h-20 bg-black border-t-2 border-[#f27200] flex items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className={`w-4 h-4 md:w-5 md:h-5 ${imageURL ? 'bg-[#f27200]' : 'bg-[#333]'} border-2 border-[#f27200]`} />
-          <span className="text-white text-sm md:text-lg font-bold uppercase tracking-wider hidden md:inline">
-            {imageURL ? 'IMAGE LOADED' : 'NO IMAGE'}
-          </span>
-          <span className="text-white text-sm md:text-lg font-bold uppercase tracking-wider md:hidden">
-            {imageURL ? 'LOADED' : 'EMPTY'}
-          </span>
-          <span className="text-white/30 text-[10px] md:text-xs font-normal ml-2 md:ml-3">
-            © 2025
+        <div className="flex items-center">
+          <span className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-widest">
+            © 2025 MATTIA CAPOMAGI
           </span>
         </div>
         
