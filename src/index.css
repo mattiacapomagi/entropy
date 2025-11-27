@@ -11,14 +11,7 @@
 /* Custom Cursor - Desktop Only */
 @media (pointer: fine) {
   body {
-    cursor: url("/src/assets/cursor.svg") 10 7, auto;
-    cursor: -webkit-image-set(
-          url("/src/assets/cursor.svg") 1x,
-          url("/src/assets/cursor.svg") 2x,
-          url("/src/assets/cursor.svg") 3x
-        )
-        10 7,
-      auto;
+    cursor: url("/src/assets/cursor-large.svg") 120 84, auto;
   }
 
   a,
@@ -27,14 +20,7 @@
   select,
   [role="button"],
   .cursor-pointer {
-    cursor: url("/src/assets/pointer.svg") 9 8, pointer;
-    cursor: -webkit-image-set(
-          url("/src/assets/pointer.svg") 1x,
-          url("/src/assets/pointer.svg") 2x,
-          url("/src/assets/pointer.svg") 3x
-        )
-        9 8,
-      pointer;
+    cursor: url("/src/assets/pointer-large.svg") 108 96, pointer;
   }
 }
 
