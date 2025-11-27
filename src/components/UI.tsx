@@ -56,6 +56,22 @@ const PALETTE_PRESETS = [
   { name: 'AMBER', colors: ['#1a0f00', '#78350f', '#b45309', '#f59e0b', '#fbbf24', '#fde68a'] },
   { name: 'EMERALD', colors: ['#022c22', '#064e3b', '#059669', '#10b981', '#6ee7b7'] },
   { name: 'ROSE', colors: ['#1a0000', '#881337', '#e11d48', '#fb7185', '#fda4af', '#ffe4e6'] },
+  { name: 'CORAL REEF', colors: ['#ff6b6b', '#f4a261', '#e76f51', '#2a9d8f', '#264653'] },
+  { name: 'LAVENDER', colors: ['#230338', '#511281', '#9d4edd', '#c77dff', '#e0aaff'] },
+  { name: 'TROPICAL', colors: ['#003d5b', '#00a8e8', '#00c9ff', '#ffd60a', '#ff6700'] },
+  { name: 'CANDY', colors: ['#ff0a54', '#ff477e', '#ff5c8a', '#ff8fab', '#ffc2d1'] },
+  { name: 'COSMIC', colors: ['#1a0033', '#5d00a6', '#a200e6', '#ff00ff', '#00ffff'] },
+  { name: 'AUTUMN', colors: ['#441100', '#8b3a00', '#cd5c00', '#e67e22', '#f39c12'] },
+  { name: 'MINT', colors: ['#0d3b3b', '#1a7070', '#26a69a', '#4db6ac', '#80cbc4'] },
+  { name: 'CHERRY', colors: ['#350000', '#6b0000', '#c1121f', '#ee4266', '#ff6b9d'] },
+  { name: 'SAPPHIRE', colors: ['#001233', '#0353a4', '#023e7d', '#0466c8', '#4cc9f0'] },
+  { name: 'LEMON', colors: ['#443300', '#997700', '#ffb700', '#ffe066', '#fff5cc'] },
+  { name: 'BUBBLE GUM', colors: ['#ff006e', '#fb5607', '#ffbe0b', '#8338ec', '#3a86ff'] },
+  { name: 'MIDNIGHT', colors: ['#0a0a0a', '#1a1a2e', '#16213e', '#0f3460', '#533483'] },
+  { name: 'PEACH', colors: ['#4a1c1c', '#b85042', '#e09f7d', '#f7d6bf', '#fff4e6'] },
+  { name: 'JUNGLE', colors: ['#0a1f0a', '#1e4620', '#2d6a2d', '#40993e', '#6bc96a'] },
+  { name: 'MAGMA', colors: ['#1a0000', '#8b0000', '#ff4500', '#ff6347', '#ffa07a'] },
+  { name: 'ARCTIC', colors: ['#001f3f', '#003d5b', '#005f73', '#0a9396', '#94d2bd'] },
 ]
 
 export function LabOverlay() {
