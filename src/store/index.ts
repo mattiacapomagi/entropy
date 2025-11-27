@@ -16,6 +16,10 @@ interface AppState {
   saturation: number
   gamma: number
   vibrance: number
+  shadows: number
+  highlights: number
+  blacks: number
+  whites: number
   colorMode: number
   tintHue: number
   paletteColors: string[]
@@ -33,6 +37,10 @@ interface AppState {
   setSaturation: (saturation: number) => void
   setGamma: (gamma: number) => void
   setVibrance: (vibrance: number) => void
+  setShadows: (shadows: number) => void
+  setHighlights: (highlights: number) => void
+  setBlacks: (blacks: number) => void
+  setWhites: (whites: number) => void
   setColorMode: (mode: number) => void
   setTintHue: (hue: number) => void
   setPaletteColors: (colors: string[]) => void
@@ -57,6 +65,10 @@ const getHistoryState = (state: AppState): Partial<AppState> => ({
   saturation: state.saturation,
   gamma: state.gamma,
   vibrance: state.vibrance,
+  shadows: state.shadows,
+  highlights: state.highlights,
+  blacks: state.blacks,
+  whites: state.whites,
   colorMode: state.colorMode,
   tintHue: state.tintHue,
   paletteColors: [...state.paletteColors],
@@ -75,6 +87,10 @@ export const useStore = create<AppState>((set, get) => ({
   saturation: 100,
   gamma: 100,
   vibrance: 100,
+  shadows: 100,
+  highlights: 100,
+  blacks: 100,
+  whites: 100,
   colorMode: 0,
   tintHue: 20.0,
   paletteColors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'],
@@ -135,6 +151,10 @@ export const useStore = create<AppState>((set, get) => ({
   setSaturation: (saturation) => { get().pushToHistory(); set({ saturation }) },
   setGamma: (gamma) => { get().pushToHistory(); set({ gamma }) },
   setVibrance: (vibrance) => { get().pushToHistory(); set({ vibrance }) },
+  setShadows: (shadows) => { get().pushToHistory(); set({ shadows }) },
+  setHighlights: (highlights) => { get().pushToHistory(); set({ highlights }) },
+  setBlacks: (blacks) => { get().pushToHistory(); set({ blacks }) },
+  setWhites: (whites) => { get().pushToHistory(); set({ whites }) },
   setColorMode: (mode) => { get().pushToHistory(); set({ colorMode: mode }) },
   setTintHue: (hue) => { get().pushToHistory(); set({ tintHue: hue }) },
   setPaletteColors: (colors) => { get().pushToHistory(); set({ paletteColors: colors }) },

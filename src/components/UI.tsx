@@ -83,6 +83,10 @@ export function LabOverlay() {
   const saturation = useStore((state) => state.saturation)
   const gamma = useStore((state) => state.gamma)
   const vibrance = useStore((state) => state.vibrance)
+  const shadows = useStore((state) => state.shadows)
+  const highlights = useStore((state) => state.highlights)
+  const blacks = useStore((state) => state.blacks)
+  const whites = useStore((state) => state.whites)
   const colorMode = useStore((state) => state.colorMode)
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
@@ -95,6 +99,10 @@ export function LabOverlay() {
   const setSaturation = useStore((state) => state.setSaturation)
   const setGamma = useStore((state) => state.setGamma)
   const setVibrance = useStore((state) => state.setVibrance)
+  const setShadows = useStore((state) => state.setShadows)
+  const setHighlights = useStore((state) => state.setHighlights)
+  const setBlacks = useStore((state) => state.setBlacks)
+  const setWhites = useStore((state) => state.setWhites)
   const setColorMode = useStore((state) => state.setColorMode)
   const setTintHue = useStore((state) => state.setTintHue)
   const setPaletteColors = useStore((state) => state.setPaletteColors)
@@ -369,8 +377,12 @@ export function LabOverlay() {
               </div>
               
               {[
-                { label: 'BRIGHT', value: brightness, setter: setBrightness, min: 0, max: 200 },
+                { label: 'BRIGHTNESS', value: brightness, setter: setBrightness, min: 0, max: 200 },
                 { label: 'CONTRAST', value: contrast, setter: setContrast, min: 0, max: 200 },
+                { label: 'SHADOWS', value: shadows, setter: setShadows, min: 0, max: 200 },
+                { label: 'LIGHTS', value: highlights, setter: setHighlights, min: 0, max: 200 },
+                { label: 'BLACKS', value: blacks, setter: setBlacks, min: 0, max: 200 },
+                { label: 'WHITES', value: whites, setter: setWhites, min: 0, max: 200 },
                 { label: 'GAMMA', value: gamma, setter: setGamma, min: 0, max: 200 },
                 { label: 'SATURATION', value: saturation, setter: setSaturation, min: 0, max: 200 },
                 { label: 'VIBRANCE', value: vibrance, setter: setVibrance, min: 0, max: 200 },

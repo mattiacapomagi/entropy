@@ -22,6 +22,10 @@ uniform float uContrast;
 uniform float uSaturation;
 uniform float uGamma;
 uniform float uVibrance;
+uniform float uShadows;
+uniform float uHighlights;
+uniform float uBlacks;
+uniform float uWhites;
 uniform int uColorMode;
 uniform float uTintHue;
 uniform vec3 uPalette[4];
@@ -214,6 +218,22 @@ void main() {
   
   // 2. Apply Brightness & Contrast (BEFORE Dithering)
   color = (color - 0.5) * uContrast + 0.5 + uBrightness;
+  
+  // 2b. Apply Shadows & Highlights
+  float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+  float shadowFactor = 1.0 - smoothstep(0.0, 1.0, luma);
+  float highlightFactor = smoothstep(0.0, 1.0, luma);
+  
+  color += uShadows * shadowFactor * 0.5;
+  color += uHighlights * highlightFactor * 0.5;
+  
+  // 2c. Apply Blacks & Whites (Levels)
+  // Blacks: Adjust black point (Negative = Crush, Positive = Lift)
+  // Whites: Adjust white point (Negative = Dim, Positive = Blow out)
+  float blackPoint = -uBlacks * 0.2;
+  float whitePoint = 1.0 - uWhites * 0.2;
+  color = (color - blackPoint) / (whitePoint - blackPoint);
+
   color = clamp(color, 0.0, 1.0); // Clamp to avoid crazy values before dithering
   
   // 3. Apply Dithering
@@ -253,6 +273,10 @@ const ScreenQuad = memo(function ScreenQuad() {
   const saturation = useStore((state) => state.saturation)
   const gamma = useStore((state) => state.gamma)
   const vibrance = useStore((state) => state.vibrance)
+  const shadows = useStore((state) => state.shadows)
+  const highlights = useStore((state) => state.highlights)
+  const blacks = useStore((state) => state.blacks)
+  const whites = useStore((state) => state.whites)
   const colorMode = useStore((state) => state.colorMode)
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
@@ -327,6 +351,10 @@ const ScreenQuad = memo(function ScreenQuad() {
     uSaturation: { value: 1.0 },
     uGamma: { value: 1.0 },
     uVibrance: { value: 0.0 },
+    uShadows: { value: 0.0 },
+    uHighlights: { value: 0.0 },
+    uBlacks: { value: 0.0 },
+    uWhites: { value: 0.0 },
     uColorMode: { value: 0 },
     uTintHue: { value: 20.0 },
     uPalette: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] },
@@ -358,7 +386,13 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uContrast.value = contrast / 100.0
       materialRef.current.uniforms.uSaturation.value = saturation / 100.0
       materialRef.current.uniforms.uGamma.value = Math.max(0.01, gamma / 100.0)
-      materialRef.current.uniforms.uVibrance.value = (vibrance - 100) / 100.0
+      // INVERTED Vibrance as requested by user
+      materialRef.current.uniforms.uVibrance.value = -1.0 * (vibrance - 100) / 100.0
+      
+      materialRef.current.uniforms.uShadows.value = (shadows - 100) / 100.0
+      materialRef.current.uniforms.uHighlights.value = (highlights - 100) / 100.0
+      materialRef.current.uniforms.uBlacks.value = (blacks - 100) / 100.0
+      materialRef.current.uniforms.uWhites.value = (whites - 100) / 100.0
       
       materialRef.current.uniforms.uColorMode.value = colorMode
       materialRef.current.uniforms.uTintHue.value = tintHue
