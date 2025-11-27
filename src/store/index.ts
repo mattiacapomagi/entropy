@@ -21,6 +21,7 @@ interface AppState {
   paletteColors: string[]
   
   isExporting: boolean
+  isFullscreen: boolean
   
   setCurrentTool: (tool: Tool) => void
   setImage: (url: string | null, width: number, height: number) => void
@@ -36,6 +37,7 @@ interface AppState {
   setTintHue: (hue: number) => void
   setPaletteColors: (colors: string[]) => void
   setIsExporting: (isExporting: boolean) => void
+  setIsFullscreen: (isFullscreen: boolean) => void
   // History
   past: AppState[],
   future: AppState[],
@@ -78,6 +80,7 @@ export const useStore = create<AppState>((set, get) => ({
   paletteColors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'],
   
   isExporting: false,
+  isFullscreen: false,
   
   past: [],
   future: [],
@@ -137,4 +140,5 @@ export const useStore = create<AppState>((set, get) => ({
   setPaletteColors: (colors) => { get().pushToHistory(); set({ paletteColors: colors }) },
   
   setIsExporting: (isExporting) => set({ isExporting }),
+  setIsFullscreen: (isFullscreen) => set({ isFullscreen }),
 }))

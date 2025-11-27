@@ -86,6 +86,8 @@ export function LabOverlay() {
   const setTintHue = useStore((state) => state.setTintHue)
   const setPaletteColors = useStore((state) => state.setPaletteColors)
   const setIsExporting = useStore((state) => state.setIsExporting)
+  const isFullscreen = useStore((state) => state.isFullscreen)
+  const setIsFullscreen = useStore((state) => state.setIsFullscreen)
   const setImage = useStore((state) => state.setImage)
   const imageURL = useStore((state) => state.imageURL)
   
@@ -217,7 +219,10 @@ export function LabOverlay() {
       <div className="absolute top-14 md:top-16 bottom-16 md:bottom-20 left-0 right-0 flex flex-col md:flex-row">
         
         {/* PREVIEW AREA (Top on mobile, Right on desktop) */}
-        <div className="flex-1 relative bg-black order-1 md:order-2 h-[40%] md:h-auto border-b-2 md:border-b-0 border-[#f27200] md:border-none">
+        <div className={`
+          relative bg-black order-1 md:order-2 
+          ${isFullscreen ? 'fixed inset-0 z-50 h-[100dvh] w-full' : 'flex-1 h-[40%] md:h-auto border-b-2 md:border-b-0 border-[#f27200] md:border-none'}
+        `}>
           {!imageURL ? (
             <div
               onClick={handleFileClick}
@@ -232,12 +237,28 @@ export function LabOverlay() {
           ) : (
             <div className="absolute inset-0">
               <Stage />
+              
+              {/* Fullscreen Toggle Button */}
+              <button 
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="absolute top-4 right-4 z-10 bg-black/50 text-[#f27200] border-2 border-[#f27200] p-2 hover:bg-[#f27200] hover:text-black transition-colors"
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+                )}
+              </button>
             </div>
           )}
         </div>
 
         {/* SIDEBAR - BLACK (Bottom on mobile, Left on desktop) */}
-        <div className="w-full md:w-80 h-[60%] md:h-auto bg-black border-r-0 md:border-r-2 border-[#f27200] overflow-y-auto scrollbar-hide order-2 md:order-1">
+        <div className={`
+          w-full md:w-80 bg-black border-r-0 md:border-r-2 border-[#f27200] overflow-y-auto scrollbar-hide order-2 md:order-1
+          ${isFullscreen ? 'hidden' : 'h-[60%] md:h-auto'}
+        `}>
           <div className="p-4 space-y-4">
             
             {/* COLOR */}
