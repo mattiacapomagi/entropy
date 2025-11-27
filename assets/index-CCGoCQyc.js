@@ -4074,10 +4074,9 @@ float halftoneLine(vec2 uv, float angle, float scale) {
   return sin(point.y * 3.14159) * 0.5 + 0.5;
 }
 
-// Function to get the dithered color BEFORE adjustments
-vec3 getDitheredColor(vec2 uv) {
-  // No pixelation/DPI logic anymore, just raw texture sampling
-  vec3 color = texture2D(uTexture, uv).rgb;
+// Function to get the dithered color
+vec3 getDitheredColor(vec3 inputColor, vec2 uv) {
+  vec3 color = inputColor;
   
   // Color Modes & Dithering
   if (uColorMode == 1) {
@@ -4102,8 +4101,8 @@ vec3 getDitheredColor(vec2 uv) {
     float localFract = fract(scaledGray);
     
     if (uDitherStrength > 0.0) {
-       // Use gl_FragCoord with scale applied
-       vec2 pixelCoord = gl_FragCoord.xy / uDitherScale;
+       // Use Image-Space Coordinates for consistency
+       vec2 pixelCoord = (uv * uImageResolution) / uDitherScale;
        float threshold = 0.5;
        
        // Algorithms
@@ -4120,10 +4119,7 @@ vec3 getDitheredColor(vec2 uv) {
           threshold = bayer4x4(rotated);
        }
        else if (uDitherAlgorithm == 5) { // Halftone Dot (Improved)
-          // Scale needs to be related to DPI or just fixed?
-          // Let's make it fixed but high freq
-          threshold = halftoneDot(uv, 0.785, 0.2 * uDitherScale); // 0.2 scale
-          // Clamp to 0-1
+          threshold = halftoneDot(uv, 0.785, 0.2 * uDitherScale); 
           threshold = clamp(threshold, 0.0, 1.0);
        }
        else if (uDitherAlgorithm == 6) { // Halftone Line
@@ -4147,8 +4143,8 @@ vec3 getDitheredColor(vec2 uv) {
   
   // Standard Dithering (for non-palette modes)
   if (uDitherStrength > 0.0 && uColorMode != 3) {
-    // Use gl_FragCoord with scale applied
-    vec2 pixelCoord = gl_FragCoord.xy / uDitherScale;
+    // Use Image-Space Coordinates for consistency
+    vec2 pixelCoord = (uv * uImageResolution) / uDitherScale;
     float threshold = 0.5;
     
     if (uDitherAlgorithm == 0) threshold = bayer2x2(pixelCoord);
@@ -4207,13 +4203,17 @@ void main() {
 
   vec2 uv = uvContain;
   
-  // Get color with dithering applied
-  vec3 color = getDitheredColor(uv);
+  // 1. Sample Texture
+  vec3 color = texture2D(uTexture, uv).rgb;
   
-  // Apply Color Adjustments
-  
-  // Brightness & Contrast
+  // 2. Apply Brightness & Contrast (BEFORE Dithering)
   color = (color - 0.5) * uContrast + 0.5 + uBrightness;
+  color = clamp(color, 0.0, 1.0); // Clamp to avoid crazy values before dithering
+  
+  // 3. Apply Dithering
+  color = getDitheredColor(color, uv);
+  
+  // 4. Apply Post-Processing (Gamma, Saturation, Vibrance)
   
   // Gamma
   color = pow(max(color, vec3(0.0)), vec3(uGamma));
@@ -4222,14 +4222,14 @@ void main() {
   float luminance = dot(color, vec3(0.299, 0.587, 0.114));
   color = mix(vec3(luminance), color, uSaturation);
   
-  // Vibrance (affects less saturated colors more)
+  // Vibrance
   float maxColor = max(max(color.r, color.g), color.b);
   float minColor = min(min(color.r, color.g), color.b);
   float sat = maxColor - minColor;
   float vibranceEffect = (1.0 - sat) * uVibrance;
   color = mix(vec3(luminance), color, 1.0 + vibranceEffect);
   
-  // Clamp final color
+  // Final Clamp
   color = clamp(color, 0.0, 1.0);
 
   gl_FragColor = vec4(color, 1.0);
