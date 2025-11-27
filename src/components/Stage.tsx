@@ -249,14 +249,7 @@ void main() {
 
   vec2 uv = uvContain;
   
-  vec3 color;
-
-  // 1. Chromatic Aberration
-  if (uAberration > 0.0) {
-    float offset = uAberration * 0.01; 
-    float r = getDitheredColor(uv + vec2(offset, 0.0)).r;
-    float g = getDitheredColor(uv).g;
-    float b = getDitheredColor(uv - vec2(offset, 0.0)).b;
+  // Get color with dithering applied
   vec3 color = getDitheredColor(uv);
   
   // Apply Color Adjustments
