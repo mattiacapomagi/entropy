@@ -307,31 +307,26 @@ function ScreenQuad() {
         loadedTexture.needsUpdate = true
         setTexture(loadedTexture)
         
-        // FIT TO SCREEN LOGIC
+        // FIT TO SCREEN LOGIC - Always fit to WIDTH
         const img = loadedTexture.image
         if (img && controlsRef.current && camera) {
-           const padding = 0.9 // Keep 90% of screen filled
-           const screenAspect = size.width / size.height
-           const imageAspect = img.width / img.height
+           const padding = 0.95 // Keep 95% of screen width filled
            
-           let newZoom = 1
-           if (screenAspect > imageAspect) {
-             // Screen is wider than image -> Fit to height
-             newZoom = (size.height * padding) / img.height
-           } else {
-             // Screen is taller than image -> Fit to width
-             newZoom = (size.width * padding) / img.width
-           }
+           // ALWAYS fit to width (horizontal fit)
+           const newZoom = (size.width * padding) / img.width
            
            // Update camera zoom
            const orthoCam = camera as THREE.OrthographicCamera
            orthoCam.zoom = newZoom
            orthoCam.updateProjectionMatrix()
            
-           // Reset controls center
-           controlsRef.current.reset()
-           controlsRef.current.object.zoom = newZoom
-           controlsRef.current.object.updateProjectionMatrix()
+           // Set minZoom to prevent zooming out below fit-to-screen (prevents glitchy bands)
+           if (controlsRef.current) {
+             controlsRef.current.minZoom = newZoom * 0.95 // Allow slight zoom out but not too much
+             controlsRef.current.reset()
+             controlsRef.current.object.zoom = newZoom
+             controlsRef.current.object.updateProjectionMatrix()
+           }
         }
       }
     })
