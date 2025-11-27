@@ -502,20 +502,8 @@ export function LabOverlay() {
               </p>
             </div>
           ) : (
-            <div className="flex-1 relative border-4 border-white overflow-hidden flex flex-col bg-[#111] transition-shadow hover:shadow-lg hover:shadow-white/20">
-              {/* Transparency Grid Background */}
-              <div 
-                className="absolute inset-0 opacity-20 pointer-events-none"
-                style={{
-                  backgroundImage: `linear-gradient(45deg, #333 25%, transparent 25%), 
-                                  linear-gradient(-45deg, #333 25%, transparent 25%), 
-                                  linear-gradient(45deg, transparent 75%, #333 75%), 
-                                  linear-gradient(-45deg, transparent 75%, #333 75%)`,
-                  backgroundSize: '20px 20px',
-                  backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
-                }}
-              />
-              <div className="flex-1 relative z-10">
+            <div className="flex-1 relative overflow-hidden flex flex-col bg-black">
+              <div className="flex-1 relative">
                 <Stage />
               </div>
             </div>

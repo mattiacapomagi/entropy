@@ -449,7 +449,7 @@ function ScreenQuad() {
 
 export function Stage() {
   return (
-    <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none p-4">
+    <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none">
       <div className="relative w-full h-full pointer-events-auto">
         <Canvas
           gl={{ preserveDrawingBuffer: true, antialias: false }}
