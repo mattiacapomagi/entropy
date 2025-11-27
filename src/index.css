@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: "PP Monument";
-  src: url("/src/fonts/PPMonumentNormal-Variable.woff") format("woff");
+  src: url("./fonts/PPMonumentNormal-Variable.woff") format("woff");
   font-weight: 100 900;
   font-style: normal;
   font-display: block;

@@ -70,7 +70,7 @@ export function LabOverlay() {
   const saturation = useStore((state) => state.saturation)
   const gamma = useStore((state) => state.gamma)
   const vibrance = useStore((state) => state.vibrance)
-  const aberration = useStore((state) => state.aberration)
+  const sharpness = useStore((state) => state.sharpness)
   const colorMode = useStore((state) => state.colorMode)
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
@@ -83,7 +83,7 @@ export function LabOverlay() {
   const setSaturation = useStore((state) => state.setSaturation)
   const setGamma = useStore((state) => state.setGamma)
   const setVibrance = useStore((state) => state.setVibrance)
-  const setAberration = useStore((state) => state.setAberration)
+  const setSharpness = useStore((state) => state.setSharpness)
   const setColorMode = useStore((state) => state.setColorMode)
   const setTintHue = useStore((state) => state.setTintHue)
   const setPaletteColors = useStore((state) => state.setPaletteColors)
@@ -324,18 +324,18 @@ export function LabOverlay() {
                 { label: 'GAMMA', value: gamma, setter: setGamma, min: 1, max: 100 },
                 { label: 'SAT', value: saturation, setter: setSaturation, min: 1, max: 100 },
                 { label: 'VIB', value: vibrance, setter: setVibrance, min: 1, max: 100 },
-                { label: 'ABER', value: aberration, setter: setAberration, min: 0, max: 1, step: 0.01 },
-              ].map(({ label, value, setter, min, max, step = 1 }) => (
+                { label: 'SHARP', value: sharpness, setter: setSharpness, min: 1, max: 100 },
+              ].map(({ label, value, setter, min, max }) => (
                 <div key={label} className="mb-3">
                   <div className="flex justify-between mb-1">
                     <span className="font-black uppercase text-sm">{label}</span>
-                    <span className="text-[#f27200] font-black">{typeof value === 'number' ? value.toFixed(step < 1 ? 2 : 0) : value}</span>
+                    <span className="text-[#f27200] font-black">{typeof value === 'number' ? value.toFixed(0) : value}</span>
                   </div>
                   <input
                     type="range"
                     min={min}
                     max={max}
-                    step={step}
+                    step={1}
                     value={value}
                     onChange={(e) => setter(parseFloat(e.target.value))}
                     className="w-full h-6 appearance-none bg-white border-4 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
