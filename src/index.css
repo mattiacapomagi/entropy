@@ -3,33 +3,31 @@
 @tailwind utilities;
 
 :root {
-  background-color: #050505;
+  background-color: #000000;
   color: #ffffff;
 }
 
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent scrolling for full-screen app */
+  overflow: hidden;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 900;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+* {
+  box-sizing: border-box;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+/* Remove all smooth transitions - brutalism is instant */
+* {
+  transition: none !important;
+  animation: none !important;
 }
 
-/* Hide scrollbar but keep functionality */
+/* Scrollbar hide */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -37,4 +35,10 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Force sharp rendering */
+* {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
