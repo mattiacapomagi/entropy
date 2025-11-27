@@ -201,16 +201,16 @@ export function LabOverlay() {
         className="hidden"
       />
 
-      {/* HEADER - GRAY INSTEAD OF WHITE */}
-      <div className="h-20 bg-[#ccc] border-b-8 border-black flex items-center px-8">
+      {/* HEADER - BLACK */}
+      <div className="h-20 bg-black border-b-8 border-[#f27200] flex items-center px-8">
         <div className="flex items-center gap-8">
           <button
             onClick={() => setCurrentTool('MENU')}
-            className="text-black text-2xl font-black uppercase tracking-wider hover:text-[#f27200]"
+            className="text-white text-2xl font-black uppercase tracking-wider hover:text-[#f27200]"
           >
             ◄ MENU
           </button>
-          <div className="text-black text-3xl font-black uppercase tracking-widest">
+          <div className="text-[#f27200] text-3xl font-black uppercase tracking-widest">
             ENTROPY / DITHER
           </div>
         </div>
@@ -218,20 +218,20 @@ export function LabOverlay() {
 
       {/* MAIN CONTENT */}
       <div className="absolute top-20 bottom-24 left-0 right-0 flex">
-        {/* SIDEBAR - LIGHT GRAY */}
-        <div className="w-96 bg-[#ddd] border-r-8 border-black overflow-y-auto scrollbar-hide">
+        {/* SIDEBAR - BLACK */}
+        <div className="w-96 bg-black border-r-8 border-[#f27200] overflow-y-auto scrollbar-hide">
           <div className="p-6 space-y-6">
             
             {/* COLOR */}
-            <div className="border-8 border-black p-4 bg-black text-white">
-              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-white pb-2">
+            <div className="border-8 border-[#f27200] p-4 bg-black text-white">
+              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#f27200] pb-2">
                 COLOR
               </div>
               
               <select
                 value={colorMode}
                 onChange={(e) => setColorMode(parseInt(e.target.value))}
-                className="w-full bg-white text-black border-4 border-black p-3 font-black text-lg uppercase"
+                className="w-full bg-[#f27200] text-black border-4 border-[#f27200] p-3 font-black text-lg uppercase"
               >
                 {COLOR_MODES.map(mode => (
                   <option key={mode.id} value={mode.id}>{mode.name}</option>
@@ -242,7 +242,7 @@ export function LabOverlay() {
                 <div className="mt-4">
                   <div className="flex justify-between mb-2">
                     <span className="font-semibold uppercase text-sm">HUE</span>
-                    <div className="w-12 h-6 border-4 border-white" style={{ backgroundColor: hueToRGB(tintHue) }} />
+                    <div className="w-12 h-6 border-4 border-[#f27200]" style={{ backgroundColor: hueToRGB(tintHue) }} />
                   </div>
                   <input
                     type="range"
@@ -250,7 +250,7 @@ export function LabOverlay() {
                     max="360"
                     value={tintHue}
                     onChange={(e) => setTintHue(parseFloat(e.target.value))}
-                    className="w-full h-8 appearance-none bg-white border-4 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
+                    className="w-full h-8 appearance-none bg-[#333] border-4 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                   />
                 </div>
               )}
@@ -270,7 +270,7 @@ export function LabOverlay() {
                         }
                       }
                     }}
-                    className="w-full bg-white text-black border-4 border-black p-3 font-black text-lg uppercase"
+                    className="w-full bg-[#f27200] text-black border-4 border-[#f27200] p-3 font-black text-lg uppercase"
                   >
                     <option value="">SELECT PRESET</option>
                     {PALETTE_PRESETS.map(p => (
@@ -285,7 +285,7 @@ export function LabOverlay() {
                         <select
                           value={customColorCount}
                           onChange={(e) => handleCustomColorCountChange(parseInt(e.target.value))}
-                          className="bg-white text-black border-4 border-white p-2 font-black text-sm"
+                          className="bg-[#f27200] text-black border-4 border-[#f27200] p-2 font-black text-sm"
                         >
                           {[...Array(12)].map((_, i) => (
                             <option key={i + 1} value={i + 1}>{i + 1}</option>
@@ -302,7 +302,7 @@ export function LabOverlay() {
                         type="color"
                         value={color}
                         onChange={(e) => updatePaletteColor(index, e.target.value)}
-                        className="w-full h-16 border-4 border-white cursor-pointer"
+                        className="w-full h-16 border-4 border-[#f27200] cursor-pointer"
                       />
                     ))}
                   </div>
@@ -311,8 +311,8 @@ export function LabOverlay() {
             </div>
 
             {/* ADJUST */}
-            <div className="border-8 border-black p-4 bg-black text-white">
-              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-white pb-2">
+            <div className="border-8 border-[#f27200] p-4 bg-black text-white">
+              <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-[#f27200] pb-2">
                 ADJUST
               </div>
               
@@ -335,14 +335,14 @@ export function LabOverlay() {
                     step={1}
                     value={value}
                     onChange={(e) => setter(parseFloat(e.target.value))}
-                    className="w-full h-6 appearance-none bg-white border-4 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
+                    className="w-full h-6 appearance-none bg-[#333] border-4 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                   />
                 </div>
               ))}
             </div>
 
             {/* DITHER */}
-            <div className="border-8 border-black p-4 bg-[#f27200] text-black">
+            <div className="border-8 border-[#f27200] p-4 bg-[#f27200] text-black">
               <div className="text-xl font-bold mb-4 uppercase tracking-wider border-b-4 border-black pb-2">
                 DITHER
               </div>
@@ -400,11 +400,11 @@ export function LabOverlay() {
               onClick={handleFileClick}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="absolute inset-0 flex flex-col items-center justify-center border-8 border-dashed border-white/30 m-16 cursor-pointer hover:border-white"
+              className="absolute inset-0 flex flex-col items-center justify-center border-8 border-dashed border-[#f27200]/30 m-16 cursor-pointer hover:border-[#f27200]"
             >
-              <div className="text-white text-6xl font-black mb-8">↑</div>
-              <div className="text-white text-3xl font-black uppercase tracking-widest">DROP IMAGE</div>
-              <div className="text-white/50 text-xl font-black uppercase mt-4">OR CLICK</div>
+              <div className="text-[#f27200] text-6xl font-black mb-8">↑</div>
+              <div className="text-[#f27200] text-3xl font-black uppercase tracking-widest">DROP IMAGE</div>
+              <div className="text-[#f27200]/50 text-xl font-black uppercase mt-4">OR CLICK</div>
             </div>
           ) : (
             <div className="absolute inset-0">
@@ -414,14 +414,14 @@ export function LabOverlay() {
         </div>
       </div>
 
-      {/* FOOTER - GRAY */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-[#ccc] border-t-8 border-black flex items-center justify-between px-8">
+      {/* FOOTER - BLACK */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-black border-t-8 border-[#f27200] flex items-center justify-between px-8">
         <div className="flex items-center gap-6">
-          <div className={`w-6 h-6 ${imageURL ? 'bg-[#f27200]' : 'bg-black'} border-4 border-black`} />
-          <span className="text-black text-2xl font-black uppercase tracking-wider">
+          <div className={`w-6 h-6 ${imageURL ? 'bg-[#f27200]' : 'bg-[#333]'} border-4 border-[#f27200]`} />
+          <span className="text-white text-2xl font-black uppercase tracking-wider">
             {imageURL ? 'IMAGE LOADED' : 'NO IMAGE'}
           </span>
-          <span className="text-black/30 text-xs font-normal ml-4">
+          <span className="text-white/30 text-xs font-normal ml-4">
             © MATTIA CAPOMAGI 2025
           </span>
         </div>
@@ -430,14 +430,14 @@ export function LabOverlay() {
           <button
             onClick={handleClearImage}
             disabled={!imageURL}
-            className="bg-[#ccc] text-black px-8 py-4 border-8 border-black font-black text-xl uppercase tracking-wider hover:bg-black hover:text-white disabled:opacity-30 disabled:hover:bg-[#ccc] disabled:hover:text-black"
+            className="bg-black text-white px-8 py-4 border-8 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-[#f27200] hover:text-black disabled:opacity-30 disabled:hover:bg-black disabled:hover:text-white"
           >
             CLEAR
           </button>
           <button
             onClick={handleExport}
             disabled={!imageURL}
-            className="bg-[#f27200] text-white px-8 py-4 border-8 border-black font-black text-xl uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
+            className="bg-[#f27200] text-black px-8 py-4 border-8 border-[#f27200] font-black text-xl uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
           >
             DOWNLOAD
           </button>
