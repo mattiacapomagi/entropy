@@ -6,11 +6,8 @@ const DITHER_ALGORITHMS = [
   { id: 0, name: 'BAYER 2X2' },
   { id: 1, name: 'BAYER 4X4' },
   { id: 2, name: 'BAYER 8X8' },
-  { id: 3, name: 'RANDOM' },
-  { id: 4, name: 'CLUSTERED DOT' },
-  { id: 5, name: 'HALFTONE DOT' },
-  { id: 6, name: 'HALFTONE LINE' },
-  { id: 7, name: 'CROSSHATCH' }
+  { id: 3, name: 'HALFTONE 45°' },
+  { id: 4, name: 'HALFTONE 22°' }
 ]
 
 const COLOR_MODES = [

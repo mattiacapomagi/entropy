@@ -151,26 +151,13 @@ vec3 getDitheredColor(vec3 inputColor, vec2 uv) {
        if (uDitherAlgorithm == 0) threshold = bayer2x2(pixelCoord);
        else if (uDitherAlgorithm == 1) threshold = bayer4x4(pixelCoord);
        else if (uDitherAlgorithm == 2) threshold = bayer8x8(pixelCoord);
-       else if (uDitherAlgorithm == 3) threshold = random(pixelCoord);
-       else if (uDitherAlgorithm == 4) { // Clustered Dot
-          float angle = 45.0 * 3.14159 / 180.0;
-          vec2 rotated = vec2(
-            pixelCoord.x * cos(angle) - pixelCoord.y * sin(angle),
-            pixelCoord.x * sin(angle) + pixelCoord.y * cos(angle)
-          );
-          threshold = bayer4x4(rotated);
-       }
-       else if (uDitherAlgorithm == 5) { // Halftone Dot (Improved)
+       else if (uDitherAlgorithm == 3) { // Halftone 45°
           threshold = halftoneDot(uv, 0.785, 0.2 * uDitherScale); 
           threshold = clamp(threshold, 0.0, 1.0);
        }
-       else if (uDitherAlgorithm == 6) { // Halftone Line
-          threshold = halftoneLine(uv, 0.785, 0.3 * uDitherScale);
-       }
-       else if (uDitherAlgorithm == 7) { // Crosshatch
-          float l1 = halftoneLine(uv, 0.785, 0.3);
-          float l2 = halftoneLine(uv, -0.785, 0.3);
-          threshold = (l1 + l2) * 0.5; // Average
+       else if (uDitherAlgorithm == 4) { // Halftone 22°
+          threshold = halftoneDot(uv, 0.384, 0.2 * uDitherScale); // 22° in radians ≈ 0.384
+          threshold = clamp(threshold, 0.0, 1.0);
        }
        
        return mix(
@@ -187,31 +174,17 @@ vec3 getDitheredColor(vec3 inputColor, vec2 uv) {
   if (uDitherStrength > 0.0 && uColorMode != 3) {
     // Use Image-Space Coordinates for consistency
     vec2 pixelCoord = (uv * uImageResolution) / uDitherScale;
-    float threshold = 0.5;
     
     if (uDitherAlgorithm == 0) threshold = bayer2x2(pixelCoord);
     else if (uDitherAlgorithm == 1) threshold = bayer4x4(pixelCoord);
     else if (uDitherAlgorithm == 2) threshold = bayer8x8(pixelCoord);
-    else if (uDitherAlgorithm == 3) threshold = random(pixelCoord);
-    else if (uDitherAlgorithm == 4) {
-      float angle = 45.0 * 3.14159 / 180.0;
-      vec2 rotated = vec2(
-        pixelCoord.x * cos(angle) - pixelCoord.y * sin(angle),
-        pixelCoord.x * sin(angle) + pixelCoord.y * cos(angle)
-      );
-      threshold = bayer4x4(rotated);
-    }
-    else if (uDitherAlgorithm == 5) { // Halftone Dot
+    else if (uDitherAlgorithm == 3) { // Halftone 45°
         threshold = halftoneDot(uv, 0.785, 0.2 * uDitherScale);
         threshold = clamp(threshold, 0.0, 1.0);
     }
-    else if (uDitherAlgorithm == 6) { // Halftone Line
-        threshold = halftoneLine(uv, 0.785, 0.3 * uDitherScale);
-    }
-    else if (uDitherAlgorithm == 7) { // Crosshatch
-        float l1 = halftoneLine(uv, 0.785, 0.3 * uDitherScale);
-        float l2 = halftoneLine(uv, -0.785, 0.3 * uDitherScale);
-        threshold = (l1 + l2) * 0.5;
+    else if (uDitherAlgorithm == 4) { // Halftone 22°
+        threshold = halftoneDot(uv, 0.384, 0.2 * uDitherScale);
+        threshold = clamp(threshold, 0.0, 1.0);
     }
     
     threshold = mix(0.5, threshold, uDitherStrength);
@@ -415,11 +388,9 @@ function ScreenQuad() {
         const link = document.createElement('a')
         
         const now = new Date()
-        const dateStr = now.toISOString().split('T')[0]
-        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-')
-        const hex = Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0')
+        const timestamp = now.getTime().toString().slice(-6) // Last 6 digits of timestamp
         
-        link.download = `ENTROPY_ARTIFACT_${dateStr}_${timeStr}_${hex}.png`
+        link.download = `entropy_${timestamp}.png`
         link.href = dataURL
         document.body.appendChild(link)
         link.click()
