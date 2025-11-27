@@ -16,7 +16,6 @@ interface AppState {
   saturation: number
   gamma: number
   vibrance: number
-  sharpness: number
   colorMode: number
   tintHue: number
   paletteColors: string[]
@@ -33,7 +32,6 @@ interface AppState {
   setSaturation: (saturation: number) => void
   setGamma: (gamma: number) => void
   setVibrance: (vibrance: number) => void
-  setSharpness: (sharpness: number) => void
   setColorMode: (mode: number) => void
   setTintHue: (hue: number) => void
   setPaletteColors: (colors: string[]) => void
@@ -53,7 +51,6 @@ export const useStore = create<AppState>((set) => ({
   saturation: 50,
   gamma: 50,
   vibrance: 50,
-  sharpness: 50,
   colorMode: 0,
   tintHue: 20.0,
   paletteColors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'],
@@ -70,7 +67,6 @@ export const useStore = create<AppState>((set) => ({
   setSaturation: (saturation) => set({ saturation }),
   setGamma: (gamma) => set({ gamma }),
   setVibrance: (vibrance) => set({ vibrance }),
-  setSharpness: (sharpness) => set({ sharpness }),
   setColorMode: (mode) => set({ colorMode: mode }),
   setTintHue: (hue) => set({ tintHue: hue }),
   setPaletteColors: (colors) => set({ paletteColors: colors }),

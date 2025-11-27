@@ -21,7 +21,6 @@ uniform float uContrast;
 uniform float uSaturation;
 uniform float uGamma;
 uniform float uVibrance;
-uniform float uSharpness;
 uniform int uColorMode;
 uniform float uTintHue;
 uniform vec3 uPalette[4];
@@ -279,18 +278,6 @@ void main() {
   float vibranceEffect = (1.0 - sat) * uVibrance;
   color = mix(vec3(luminance), color, 1.0 + vibranceEffect);
   
-  // Sharpness using edge detection
-  if (uSharpness != 0.0) {
-    vec2 texelSize = 1.0 / uImageResolution;
-    vec3 n = texture2D(uTexture, uv + vec2(0.0, -texelSize.y)).rgb;
-    vec3 s = texture2D(uTexture, uv + vec2(0.0, texelSize.y)).rgb;
-    vec3 e = texture2D(uTexture, uv + vec2(texelSize.x, 0.0)).rgb;
-    vec3 w = texture2D(uTexture, uv + vec2(-texelSize.x, 0.0)).rgb;
-    
-    vec3 edges = (4.0 * color - n - s - e - w);
-    color = color + edges * uSharpness;
-  }
-  
   // Clamp final color
   color = clamp(color, 0.0, 1.0);
 
@@ -309,7 +296,6 @@ function ScreenQuad() {
   const saturation = useStore((state) => state.saturation)
   const gamma = useStore((state) => state.gamma)
   const vibrance = useStore((state) => state.vibrance)
-  const sharpness = useStore((state) => state.sharpness)
   const colorMode = useStore((state) => state.colorMode)
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
@@ -357,7 +343,6 @@ function ScreenQuad() {
     uSaturation: { value: 1.0 },
     uGamma: { value: 1.0 },
     uVibrance: { value: 0.0 },
-    uSharpness: { value: 0.0 },
     uColorMode: { value: 0 },
     uTintHue: { value: 20.0 },
     uPalette: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] },
@@ -402,8 +387,6 @@ function ScreenQuad() {
       // Vibrance: 50 -> 0.0. Range -1.0 to 1.0
       materialRef.current.uniforms.uVibrance.value = (vibrance - 50) / 50.0
       
-      // Sharpness: 50 -> 0.0. Range -0.5 to 0.5
-      materialRef.current.uniforms.uSharpness.value = (sharpness - 50) / 100.0
       materialRef.current.uniforms.uColorMode.value = colorMode
       materialRef.current.uniforms.uTintHue.value = tintHue
       materialRef.current.uniforms.uPalette.value = paletteUniform

@@ -70,7 +70,6 @@ export function LabOverlay() {
   const saturation = useStore((state) => state.saturation)
   const gamma = useStore((state) => state.gamma)
   const vibrance = useStore((state) => state.vibrance)
-  const sharpness = useStore((state) => state.sharpness)
   const colorMode = useStore((state) => state.colorMode)
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
@@ -83,7 +82,6 @@ export function LabOverlay() {
   const setSaturation = useStore((state) => state.setSaturation)
   const setGamma = useStore((state) => state.setGamma)
   const setVibrance = useStore((state) => state.setVibrance)
-  const setSharpness = useStore((state) => state.setSharpness)
   const setColorMode = useStore((state) => state.setColorMode)
   const setTintHue = useStore((state) => state.setTintHue)
   const setPaletteColors = useStore((state) => state.setPaletteColors)
@@ -324,7 +322,6 @@ export function LabOverlay() {
                 { label: 'GAMMA', value: gamma, setter: setGamma, min: 1, max: 100 },
                 { label: 'SAT', value: saturation, setter: setSaturation, min: 1, max: 100 },
                 { label: 'VIB', value: vibrance, setter: setVibrance, min: 1, max: 100 },
-                { label: 'SHARP', value: sharpness, setter: setSharpness, min: 1, max: 100 },
               ].map(({ label, value, setter, min, max }) => (
                 <div key={label} className="mb-3">
                   <div className="flex justify-between mb-1">
