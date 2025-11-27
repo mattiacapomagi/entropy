@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "PP Monument";
-  src: url("./assets/font/PPMonumentNormal-Variable.woff") format("woff");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: block;
-}
-
 :root {
   background-color: #000000;
   color: #ffffff;
@@ -19,7 +11,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: "PP Monument", "Courier New", Courier, monospace;
+  font-family: "Science Gothic", "Arial", sans-serif;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
