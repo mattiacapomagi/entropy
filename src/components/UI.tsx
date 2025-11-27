@@ -1,5 +1,5 @@
 import { useStore } from '../store'
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 import { Stage } from './Stage'
 
 const DITHER_ALGORITHMS = [
@@ -98,6 +98,83 @@ export function LabOverlay() {
   const setColorMode = useStore((state) => state.setColorMode)
   const setTintHue = useStore((state) => state.setTintHue)
   const setPaletteColors = useStore((state) => state.setPaletteColors)
+
+  // Local state for smooth slider updates (prevents re-renders on every pixel)
+  const [localDitherStrength, setLocalDitherStrength] = useState(ditherStrength)
+  const [localDitherScale, setLocalDitherScale] = useState(ditherScale)
+  const [localBrightness, setLocalBrightness] = useState(brightness)
+  const [localContrast, setLocalContrast] = useState(contrast)
+  const [localSaturation, setLocalSaturation] = useState(saturation)
+  const [localGamma, setLocalGamma] = useState(gamma)
+  const [localVibrance, setLocalVibrance] = useState(vibrance)
+  const [localTintHue, setLocalTintHue] = useState(tintHue)
+
+  // Debounced update function - updates store after user stops dragging
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localDitherStrength !== ditherStrength) setDitherStrength(localDitherStrength)
+    }, 50) // 50ms debounce
+    return () => clearTimeout(timeout)
+  }, [localDitherStrength])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localDitherScale !== ditherScale) setDitherScale(localDitherScale)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localDitherScale])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localBrightness !== brightness) setBrightness(localBrightness)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localBrightness])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localContrast !== contrast) setContrast(localContrast)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localContrast])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localSaturation !== saturation) setSaturation(localSaturation)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localSaturation])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localGamma !== gamma) setGamma(localGamma)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localGamma])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localVibrance !== vibrance) setVibrance(localVibrance)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localVibrance])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (localTintHue !== tintHue) setTintHue(localTintHue)
+    }, 50)
+    return () => clearTimeout(timeout)
+  }, [localTintHue])
+
+  // Sync local state when store changes from external sources (undo/redo)
+  useEffect(() => { setLocalDitherStrength(ditherStrength) }, [ditherStrength])
+  useEffect(() => { setLocalDitherScale(ditherScale) }, [ditherScale])
+  useEffect(() => { setLocalBrightness(brightness) }, [brightness])
+  useEffect(() => { setLocalContrast(contrast) }, [contrast])
+  useEffect(() => { setLocalSaturation(saturation) }, [saturation])
+  useEffect(() => { setLocalGamma(gamma) }, [gamma])
+  useEffect(() => { setLocalVibrance(vibrance) }, [vibrance])
+  useEffect(() => { setLocalTintHue(tintHue) }, [tintHue])
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
   const setIsFullscreen = useStore((state) => state.setIsFullscreen)
@@ -300,8 +377,8 @@ export function LabOverlay() {
                     type="range"
                     min="0"
                     max="360"
-                    value={tintHue}
-                    onChange={(e) => setTintHue(parseFloat(e.target.value))}
+                    value={localTintHue}
+                    onChange={(e) => setLocalTintHue(parseFloat(e.target.value))}
                     className="w-full h-6 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />
                 </div>
@@ -369,11 +446,11 @@ export function LabOverlay() {
               </div>
               
               {[
-                { label: 'BRIGHT', value: brightness, setter: setBrightness, min: 0, max: 200 },
-                { label: 'CONTRAST', value: contrast, setter: setContrast, min: 0, max: 200 },
-                { label: 'GAMMA', value: gamma, setter: setGamma, min: 0, max: 200 },
-                { label: 'SATURATION', value: saturation, setter: setSaturation, min: 0, max: 200 },
-                { label: 'VIBRANCE', value: vibrance, setter: setVibrance, min: 0, max: 200 },
+                { label: 'BRIGHT', value: localBrightness, setter: setLocalBrightness, min: 0, max: 200 },
+                { label: 'CONTRAST', value: localContrast, setter: setLocalContrast, min: 0, max: 200 },
+                { label: 'GAMMA', value: localGamma, setter: setLocalGamma, min: 0, max: 200 },
+                { label: 'SATURATION', value: localSaturation, setter: setLocalSaturation, min: 0, max: 200 },
+                { label: 'VIBRANCE', value: localVibrance, setter: setLocalVibrance, min: 0, max: 200 },
               ].map(({ label, value, setter, min, max }) => (
                 <div key={label} className="mb-3">
                   <div className="flex justify-between mb-1">
@@ -419,8 +496,8 @@ export function LabOverlay() {
                   min="0.15"
                   max="1"
                   step="0.01"
-                  value={ditherStrength}
-                  onChange={(e) => setDitherStrength(parseFloat(e.target.value))}
+                  value={localDitherStrength}
+                  onChange={(e) => setLocalDitherStrength(parseFloat(e.target.value))}
                   className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                 />
               </div>
@@ -435,8 +512,8 @@ export function LabOverlay() {
                   min="0.5"
                   max="4"
                   step="0.1"
-                  value={ditherScale}
-                  onChange={(e) => setDitherScale(parseFloat(e.target.value))}
+                  value={localDitherScale}
+                  onChange={(e) => setLocalDitherScale(parseFloat(e.target.value))}
                   className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                 />
               </div>
