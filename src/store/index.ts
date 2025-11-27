@@ -1,27 +1,74 @@
 import { create } from 'zustand'
 
+type Tool = 'MENU' | 'DITHER'
+
 interface AppState {
+  currentTool: Tool
   imageURL: string | null
   imageDimensions: { width: number; height: number }
-  entropyLevel: number
-  noiseScale: number
+  
+  // Dither Tool Parameters
+  ditherStrength: number
+  ditherAlgorithm: number
+  brightness: number
+  contrast: number
+  saturation: number
+  gamma: number
+  vibrance: number
+  aberration: number
+  colorMode: number
+  tintHue: number
+  paletteColors: string[]
+  
   isExporting: boolean
   
-  setImage: (url: string, width: number, height: number) => void
-  setEntropyLevel: (level: number) => void
-  setNoiseScale: (scale: number) => void
+  setCurrentTool: (tool: Tool) => void
+  setImage: (url: string | null, width: number, height: number) => void
+  setDitherStrength: (strength: number) => void
+  setDitherAlgorithm: (algorithm: number) => void
+  setBrightness: (brightness: number) => void
+  setContrast: (contrast: number) => void
+  setSaturation: (saturation: number) => void
+  setGamma: (gamma: number) => void
+  setVibrance: (vibrance: number) => void
+  setAberration: (aberration: number) => void
+  setColorMode: (mode: number) => void
+  setTintHue: (hue: number) => void
+  setPaletteColors: (colors: string[]) => void
   setIsExporting: (isExporting: boolean) => void
 }
 
 export const useStore = create<AppState>((set) => ({
+  currentTool: 'MENU',
   imageURL: null,
   imageDimensions: { width: 0, height: 0 },
-  entropyLevel: 0.0,
-  noiseScale: 1.0,
+  
+  ditherStrength: 0.0,
+  ditherAlgorithm: 2,
+  brightness: 50, // 1-100, 50 neutral
+  contrast: 50,   // 1-100, 50 neutral
+  saturation: 50, // 1-100, 50 neutral
+  gamma: 50,      // 1-100, 50 neutral (approx 1.0)
+  vibrance: 50,   // 1-100, 50 neutral
+  aberration: 0.0,
+  colorMode: 0,
+  tintHue: 20.0,
+  paletteColors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'],
+  
   isExporting: false,
 
+  setCurrentTool: (tool) => set({ currentTool: tool }),
   setImage: (url, width, height) => set({ imageURL: url, imageDimensions: { width, height } }),
-  setEntropyLevel: (level) => set({ entropyLevel: level }),
-  setNoiseScale: (scale) => set({ noiseScale: scale }),
+  setDitherStrength: (strength) => set({ ditherStrength: strength }),
+  setDitherAlgorithm: (algorithm) => set({ ditherAlgorithm: algorithm }),
+  setBrightness: (brightness) => set({ brightness }),
+  setContrast: (contrast) => set({ contrast }),
+  setSaturation: (saturation) => set({ saturation }),
+  setGamma: (gamma) => set({ gamma }),
+  setVibrance: (vibrance) => set({ vibrance }),
+  setAberration: (aberration) => set({ aberration }),
+  setColorMode: (mode) => set({ colorMode: mode }),
+  setTintHue: (hue) => set({ tintHue: hue }),
+  setPaletteColors: (colors) => set({ paletteColors: colors }),
   setIsExporting: (isExporting) => set({ isExporting }),
 }))

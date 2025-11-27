@@ -1,92 +1,491 @@
 import { useStore } from '../store'
+import { useRef, useCallback } from 'react'
+import { Stage } from './Stage'
+
+const DITHER_ALGORITHMS = [
+  { id: 0, name: 'Bayer 2x2 (Sharp)' },
+  { id: 1, name: 'Bayer 4x4 (Balanced)' },
+  { id: 2, name: 'Bayer 8x8 (Smooth)' },
+  { id: 3, name: 'Random (Noisy)' },
+  { id: 4, name: 'Clustered Dot (Halftone)' },
+  { id: 5, name: 'Halftone Dot (Round)' },
+  { id: 6, name: 'Halftone Line (Scan)' },
+  { id: 7, name: 'Crosshatch (Sketch)' },
+  { id: 8, name: 'Floyd-Steinberg (CPU)' }
+]
+
+const COLOR_MODES = [
+  { id: 0, name: 'Full Color' },
+  { id: 1, name: 'Grayscale' },
+  { id: 2, name: 'Tint (Custom)' },
+  { id: 3, name: 'Multicolor (4-Color Palette)' }
+]
+
+const PALETTE_PRESETS = [
+  { name: 'Retro Coffee', colors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'] },
+  { name: 'Gameboy', colors: ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'] },
+  { name: 'Gameboy Pocket', colors: ['#c4cfa1', '#8b956d', '#4d533c', '#1f1f1f'] },
+  { name: 'CGA', colors: ['#000000', '#55ffff', '#ff55ff', '#ffffff'] },
+  { name: 'CGA 2', colors: ['#000000', '#00aaaa', '#aa0000', '#aaaaaa'] },
+  { name: 'Cyberpunk', colors: ['#0d0221', '#261447', '#ff005c', '#00f0ff'] },
+  { name: 'Vaporwave', colors: ['#2c2137', '#76448a', '#b967ff', '#62f6ff'] },
+  { name: 'Matrix', colors: ['#000000', '#003b00', '#008f11', '#00ff41'] },
+  { name: 'Sepia', colors: ['#2e1d0e', '#6b4826', '#b08d55', '#e8dcb5'] },
+  { name: 'Black & White', colors: ['#000000', '#555555', '#aaaaaa', '#ffffff'] },
+  { name: '2-Bit Gray', colors: ['#000000', '#666666', '#b3b3b3', '#ffffff'] },
+  { name: 'Midnight', colors: ['#000000', '#1a1a2e', '#16213e', '#0f3460'] },
+  { name: 'Sunset', colors: ['#2d1b2e', '#b0305c', '#eb564b', '#f2d492'] },
+  { name: 'Deep Sea', colors: ['#000000', '#001e1d', '#004e4a', '#008f8c'] },
+  { name: 'Hotline', colors: ['#2b0f54', '#ab20fd', '#ff0055', '#ff9900'] },
+  { name: 'Toxic', colors: ['#0d1b06', '#2f4d12', '#648c1f', '#99cc33'] },
+  { name: 'Candy', colors: ['#2a0928', '#7a1c5d', '#c24285', '#ff9ecf'] },
+]
 
 export function LabOverlay() {
-  const entropyLevel = useStore((state) => state.entropyLevel)
-  const noiseScale = useStore((state) => state.noiseScale)
-  const setEntropyLevel = useStore((state) => state.setEntropyLevel)
-  const setNoiseScale = useStore((state) => state.setNoiseScale)
+  const currentTool = useStore((state) => state.currentTool)
+  const setCurrentTool = useStore((state) => state.setCurrentTool)
+  
+  // Dither Tool State
+  const ditherStrength = useStore((state) => state.ditherStrength)
+  const ditherAlgorithm = useStore((state) => state.ditherAlgorithm)
+  const brightness = useStore((state) => state.brightness)
+  const contrast = useStore((state) => state.contrast)
+  const saturation = useStore((state) => state.saturation)
+  const gamma = useStore((state) => state.gamma)
+  const vibrance = useStore((state) => state.vibrance)
+  const aberration = useStore((state) => state.aberration)
+  const colorMode = useStore((state) => state.colorMode)
+  const tintHue = useStore((state) => state.tintHue)
+  const paletteColors = useStore((state) => state.paletteColors)
+  
+  // Setters
+  const setDitherStrength = useStore((state) => state.setDitherStrength)
+  const setDitherAlgorithm = useStore((state) => state.setDitherAlgorithm)
+  const setBrightness = useStore((state) => state.setBrightness)
+  const setContrast = useStore((state) => state.setContrast)
+  const setSaturation = useStore((state) => state.setSaturation)
+  const setGamma = useStore((state) => state.setGamma)
+  const setVibrance = useStore((state) => state.setVibrance)
+  const setAberration = useStore((state) => state.setAberration)
+  const setColorMode = useStore((state) => state.setColorMode)
+  const setTintHue = useStore((state) => state.setTintHue)
+  const setPaletteColors = useStore((state) => state.setPaletteColors)
   const setIsExporting = useStore((state) => state.setIsExporting)
+  const setImage = useStore((state) => state.setImage)
+  const imageURL = useStore((state) => state.imageURL)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleExport = () => {
-    setIsExporting(true)
+  const handleExport = () => setIsExporting(true)
+  const handleFileClick = () => fileInputRef.current?.click()
+
+  const loadImageFile = useCallback((file: File) => {
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file)
+      const img = new Image()
+      img.onload = () => {
+        setImage(url, img.width, img.height)
+      }
+      img.src = url
+    }
+  }, [setImage])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) loadImageFile(file)
   }
 
-  return (
-    <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-20 font-mono text-xs uppercase tracking-widest text-white mix-blend-difference">
-      {/* Top Bar */}
-      <div className="flex justify-between items-start w-full border-b border-entropy-border pb-4 bg-entropy-glass/50 backdrop-blur-sm pointer-events-auto">
-        <div className="flex flex-col">
-          <h1 className="font-display text-2xl font-bold tracking-tighter text-white">ENTROPY v1.0</h1>
-          <span className="text-entropy-acid">[ STATUS: ONLINE ]</span>
-        </div>
-        <button className="border border-entropy-beam text-entropy-beam px-4 py-2 hover:bg-entropy-beam hover:text-black transition-colors">
-          [ INSERT DATA ]
-        </button>
-      </div>
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
 
-      {/* Main Content Area (Middle) */}
-      <div className="flex-grow flex justify-between items-center w-full mt-6">
-        {/* Left Panel: Parameters */}
-        <div className="w-64 bg-entropy-glass/80 backdrop-blur-md border border-entropy-border p-4 pointer-events-auto space-y-6">
-          <h2 className="border-b border-entropy-border pb-2 mb-4 text-entropy-acid">PARAMETERS</h2>
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const file = e.dataTransfer.files[0]
+    if (file) loadImageFile(file)
+  }, [loadImageFile])
+
+  const hueToRGB = (hue: number) => {
+    const h = hue / 60
+    const c = 1
+    const x = c * (1 - Math.abs((h % 2) - 1))
+    let rgb = [0, 0, 0]
+    if (h >= 0 && h < 1) rgb = [c, x, 0]
+    else if (h >= 1 && h < 2) rgb = [x, c, 0]
+    else if (h >= 2 && h < 3) rgb = [0, c, x]
+    else if (h >= 3 && h < 4) rgb = [0, x, c]
+    else if (h >= 4 && h < 5) rgb = [x, 0, c]
+    else rgb = [c, 0, x]
+    return `rgb(${Math.round(rgb[0] * 255)}, ${Math.round(rgb[1] * 255)}, ${Math.round(rgb[2] * 255)})`
+  }
+
+  const updatePaletteColor = (index: number, color: string) => {
+    const newPalette = [...paletteColors]
+    newPalette[index] = color
+    setPaletteColors(newPalette)
+  }
+
+  // MAIN MENU VIEW
+  if (currentTool === 'MENU') {
+    return (
+      <div className="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center font-mono text-white">
+        <div className="border-4 border-white p-12 max-w-2xl w-full text-center">
+          <h1 className="text-6xl font-bold mb-2 tracking-tighter">ENTROPY</h1>
+          <div className="text-[#f27200] text-xl mb-12 tracking-widest">MULTITOOL SYSTEM v2.0</div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label>ENTROPY_LVL</label>
-              <span className="text-entropy-acid">{entropyLevel.toFixed(3)}</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.001"
-              value={entropyLevel}
-              onChange={(e) => setEntropyLevel(parseFloat(e.target.value))}
-              className="w-full h-1 bg-entropy-border appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-entropy-acid"
-            />
+          <div className="space-y-4">
+            <button 
+              onClick={() => setCurrentTool('DITHER')}
+              className="w-full bg-white text-black text-2xl font-bold py-4 hover:bg-[#f27200] hover:text-white transition-colors border-4 border-transparent hover:border-white uppercase"
+            >
+              [ DITHER TOOL ]
+            </button>
+            
+            <button 
+              disabled
+              className="w-full bg-gray-900 text-gray-500 text-2xl font-bold py-4 border-4 border-gray-800 cursor-not-allowed uppercase"
+            >
+              [ GLITCH TOOL ] (LOCKED)
+            </button>
+            
+            <button 
+              disabled
+              className="w-full bg-gray-900 text-gray-500 text-2xl font-bold py-4 border-4 border-gray-800 cursor-not-allowed uppercase"
+            >
+              [ DATA MOSH ] (LOCKED)
+            </button>
           </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <label>NOISE_SCALE</label>
-              <span className="text-entropy-acid">{noiseScale.toFixed(3)}</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="5"
-              step="0.01"
-              value={noiseScale}
-              onChange={(e) => setNoiseScale(parseFloat(e.target.value))}
-              className="w-full h-1 bg-entropy-border appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-entropy-acid"
-            />
-          </div>
-        </div>
-
-        {/* Right Panel: History (Placeholder) */}
-        <div className="w-64 bg-entropy-glass/80 backdrop-blur-md border border-entropy-border p-4 pointer-events-auto h-full max-h-96 overflow-hidden hidden md:block">
-          <h2 className="border-b border-entropy-border pb-2 mb-4 text-entropy-beam">SYSTEM_LOG</h2>
-          <div className="space-y-1 text-[10px] opacity-70">
-            <p>&gt; INIT_SEQUENCE_COMPLETE</p>
-            <p>&gt; RENDER_ENGINE_READY</p>
-            <p>&gt; AWAITING_INPUT...</p>
-            {entropyLevel > 0 && <p>&gt; ENTROPY_DETECTED: {(entropyLevel * 100).toFixed(1)}%</p>}
+          
+          <div className="mt-12 text-xs text-gray-500">
+            SYSTEM READY // WAITING FOR INPUT
           </div>
         </div>
       </div>
+    )
+  }
 
-      {/* Bottom Bar */}
-      <div className="flex justify-between items-end w-full border-t border-entropy-border pt-4 bg-entropy-glass/50 backdrop-blur-sm pointer-events-auto mt-6">
-        <div className="text-[10px] opacity-50">
-          COORD: 00.00.00 <br/>
-          MEM: 64GB OK
+  // DITHER TOOL VIEW
+  return (
+    <div className="absolute inset-0">
+      {/* Fullscreen drag and drop zone */}
+      <div 
+        className="absolute inset-0 z-10"
+        style={{ pointerEvents: imageURL ? 'none' : 'auto' }}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        {!imageURL && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-black border-4 border-white p-8 text-center text-white font-mono">
+              <div className="text-2xl font-bold mb-2">◆ DROP IMAGE HERE ◆</div>
+              <div className="text-sm opacity-70">or click [UPLOAD] button</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none flex flex-col p-4 z-20 font-mono text-white">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Navbar */}
+        <div className="flex justify-between items-center w-full bg-black border-4 border-white p-3 pointer-events-auto mb-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setCurrentTool('MENU')}
+              className="text-sm hover:text-[#f27200] border-r-2 border-white pr-4 mr-2"
+            >
+              ◄ MENU
+            </button>
+            <div className="text-lg font-bold uppercase tracking-wider">
+              ◆ DITHER TOOL ◆
+            </div>
+          </div>
+          <button 
+            onClick={handleFileClick}
+            className="bg-white text-black px-4 py-2 border-4 border-black font-bold uppercase hover:bg-[#f27200] hover:text-white transition-colors"
+          >
+            [UPLOAD]
+          </button>
         </div>
-        <button 
-          onClick={handleExport}
-          className="bg-entropy-acid text-black font-bold px-6 py-3 hover:bg-white hover:text-black transition-colors border border-transparent hover:border-entropy-acid"
-        >
-          [ DISK WRITE ]
-        </button>
+
+        {/* Controls */}
+        <div className="flex-grow flex gap-4 overflow-hidden">
+          <div className="w-80 bg-black border-4 border-white p-4 pointer-events-auto space-y-4 overflow-y-auto max-h-full scrollbar-hide">
+            <h2 className="text-lg font-bold uppercase border-b-4 border-white pb-2 mb-4">
+              ▼ CONTROLS
+            </h2>
+            
+            {/* --- COLOR SECTION --- */}
+            <div className="space-y-4 border-b-2 border-gray-800 pb-4">
+              <div className="text-[#f27200] text-xs font-bold mb-2">/// COLOR SETTINGS</div>
+              
+              <div className="space-y-1">
+                <label className="uppercase text-sm font-bold">Color Mode</label>
+                <select
+                  value={colorMode}
+                  onChange={(e) => setColorMode(parseInt(e.target.value))}
+                  className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200]"
+                >
+                  {COLOR_MODES.map(mode => (
+                    <option key={mode.id} value={mode.id}>
+                      {mode.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {colorMode === 2 && (
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <label className="uppercase">Tint Hue</label>
+                    <div 
+                      className="w-8 h-4 border-2 border-white" 
+                      style={{ backgroundColor: hueToRGB(tintHue) }}
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    step="1"
+                    value={tintHue}
+                    onChange={(e) => setTintHue(parseFloat(e.target.value))}
+                    className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                    style={{
+                      background: `linear-gradient(to right, rgb(255,0,0), rgb(255,255,0), rgb(0,255,0), rgb(0,255,255), rgb(0,0,255), rgb(255,0,255), rgb(255,0,0))`
+                    }}
+                  />
+                </div>
+              )}
+
+              {colorMode === 3 && (
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="uppercase text-sm font-bold">Presets</label>
+                    <select
+                      onChange={(e) => {
+                        const preset = PALETTE_PRESETS.find(p => p.name === e.target.value)
+                        if (preset) setPaletteColors(preset.colors)
+                      }}
+                      className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200]"
+                    >
+                      <option value="">-- Select Preset --</option>
+                      {PALETTE_PRESETS.map(p => (
+                        <option key={p.name} value={p.name}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="uppercase text-sm font-bold">Palette (Dark → Light)</label>
+                    <div className="flex justify-between gap-2">
+                      {paletteColors.map((color, index) => (
+                        <div key={index} className="flex flex-col items-center gap-1 w-full">
+                          <input
+                            type="color"
+                            value={color}
+                            onChange={(e) => updatePaletteColor(index, e.target.value)}
+                            className="w-full h-8 p-0 border-2 border-white bg-black cursor-pointer"
+                          />
+                          <span className="text-[10px] uppercase text-gray-400">{index + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* --- IMAGE ADJUSTMENTS --- */}
+            <div className="space-y-4 border-b-2 border-gray-800 pb-4">
+              <div className="text-[#f27200] text-xs font-bold mb-2">/// IMAGE ADJUSTMENTS</div>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Brightness</label>
+                  <span className="text-[#f27200]">{brightness}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={brightness}
+                  onChange={(e) => setBrightness(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Contrast</label>
+                  <span className="text-[#f27200]">{contrast}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={contrast}
+                  onChange={(e) => setContrast(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Gamma</label>
+                  <span className="text-[#f27200]">{gamma}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={gamma}
+                  onChange={(e) => setGamma(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Saturation</label>
+                  <span className="text-[#f27200]">{saturation}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={saturation}
+                  onChange={(e) => setSaturation(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Vibrance</label>
+                  <span className="text-[#f27200]">{vibrance}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={vibrance}
+                  onChange={(e) => setVibrance(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Aberration</label>
+                  <span className="text-[#f27200]">{aberration.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={aberration}
+                  onChange={(e) => setAberration(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+            </div>
+
+            {/* --- DITHERING --- */}
+            <div className="space-y-4">
+              <div className="text-[#f27200] text-xs font-bold mb-2">/// DITHERING</div>
+
+              <div className="space-y-1">
+                <label className="uppercase text-sm font-bold">Algorithm</label>
+                <select
+                  value={ditherAlgorithm}
+                  onChange={(e) => setDitherAlgorithm(parseInt(e.target.value))}
+                  className="w-full bg-black text-white border-2 border-white p-2 font-mono uppercase cursor-pointer hover:border-[#f27200]"
+                >
+                  {DITHER_ALGORITHMS.map(algo => (
+                    <option key={algo.id} value={algo.id}>
+                      {algo.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <label className="uppercase">Strength</label>
+                  <span className="text-[#f27200]">{ditherStrength.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={ditherStrength}
+                  onChange={(e) => setDitherStrength(parseFloat(e.target.value))}
+                  className="w-full h-6 bg-black appearance-none cursor-pointer border-2 border-white [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* --- CANVAS AREA --- */}
+          {!imageURL ? (
+            <div
+              onClick={handleFileClick}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-white/40 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/50 mb-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              <p className="text-white/50 text-center font-mono text-sm">
+                DRAG & DROP OR CLICK TO UPLOAD
+              </p>
+            </div>
+          ) : (
+            <div className="flex-1 relative bg-black/50 rounded-lg overflow-hidden flex flex-col">
+              <div className="absolute top-4 right-4 z-10">
+                 <button 
+                   onClick={() => setImage(null, 0, 0)}
+                   className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors"
+                   title="Remove Image"
+                 >
+                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                 </button>
+              </div>
+              <div className="flex-1 relative">
+                <Stage />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center w-full bg-black border-4 border-white p-3 pointer-events-auto mt-4">
+          <div className="text-sm">
+            {imageURL ? '■ IMAGE LOADED' : '□ NO IMAGE'}
+          </div>
+          <button 
+            onClick={handleExport}
+            disabled={!imageURL}
+            className="bg-[#f27200] text-white px-6 py-2 border-4 border-white font-bold uppercase hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            [DOWNLOAD] 
+          </button>
+        </div>
       </div>
     </div>
   )
