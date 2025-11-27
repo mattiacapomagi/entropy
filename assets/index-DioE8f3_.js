@@ -4131,6 +4131,7 @@ vec3 getDitheredColor(vec3 inputColor, vec2 uv) {
   if (uDitherStrength > 0.0 && uColorMode != 3) {
     // Use Image-Space Coordinates for consistency
     vec2 pixelCoord = (uv * uImageResolution) / uDitherScale;
+    float threshold = 0.5; // CRITICAL: declare threshold variable
     
     if (uDitherAlgorithm == 0) threshold = bayer2x2(pixelCoord);
     else if (uDitherAlgorithm == 1) threshold = bayer4x4(pixelCoord);
