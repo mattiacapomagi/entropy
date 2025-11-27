@@ -300,8 +300,10 @@ function ScreenQuad() {
     let isMounted = true
     loader.load(imageURL, (loadedTexture) => {
       if (isMounted) {
-        loadedTexture.minFilter = THREE.NearestFilter
-        loadedTexture.magFilter = THREE.NearestFilter
+        // Use LinearFilter for smooth scaling when zoomed out
+        // This prevents "blocky" appearance on mobile while maintaining pixel-perfect rendering when zoomed in
+        loadedTexture.minFilter = THREE.LinearFilter
+        loadedTexture.magFilter = THREE.LinearFilter
         loadedTexture.wrapS = THREE.ClampToEdgeWrapping
         loadedTexture.wrapT = THREE.ClampToEdgeWrapping
         loadedTexture.needsUpdate = true
