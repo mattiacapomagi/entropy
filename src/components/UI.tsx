@@ -156,7 +156,7 @@ export function LabOverlay() {
   // MAIN MENU
   if (currentTool === 'MENU') {
     return (
-      <div className="absolute inset-0 bg-black flex items-center justify-center font-mono text-white">
+      <div className="absolute inset-0 bg-black flex items-center justify-center text-white">
         <div className="border-[16px] border-white p-16 max-w-3xl w-full">
           <h1 className="text-8xl font-black mb-4 tracking-tight uppercase">ENTROPY</h1>
           <div className="text-[#f27200] text-3xl mb-16 tracking-widest font-black uppercase border-b-8 border-[#f27200] pb-4">
@@ -320,8 +320,8 @@ export function LabOverlay() {
                 { label: 'BRIGHT', value: brightness, setter: setBrightness, min: 1, max: 100 },
                 { label: 'CONTRAST', value: contrast, setter: setContrast, min: 1, max: 100 },
                 { label: 'GAMMA', value: gamma, setter: setGamma, min: 1, max: 100 },
-                { label: 'SAT', value: saturation, setter: setSaturation, min: 1, max: 100 },
-                { label: 'VIB', value: vibrance, setter: setVibrance, min: 1, max: 100 },
+                { label: 'SATURATION', value: saturation, setter: setSaturation, min: 1, max: 100 },
+                { label: 'VIBRANCE', value: vibrance, setter: setVibrance, min: 1, max: 100 },
               ].map(({ label, value, setter, min, max }) => (
                 <div key={label} className="mb-3">
                   <div className="flex justify-between mb-1">
