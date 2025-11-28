@@ -630,8 +630,8 @@ const ScreenQuad = memo(function ScreenQuad() {
       }
 
       // STANDARD PNG EXPORT (Dither / Datamosh / Terminal Raster)
-      // Apply 2x upscaling for higher quality exports (cap at 8192px)
-      const scaleFactor = 2
+      // Apply 4x upscaling for ultra-high quality exports (cap at 8192px)
+      const scaleFactor = 4
       const maxDim = 8192
       
       let exportWidth = originalWidth * scaleFactor
@@ -748,7 +748,11 @@ export function Stage() {
     <div className="absolute inset-0 w-full h-full flex">
       <div className="relative w-full h-full">
         <Canvas
-          gl={{ preserveDrawingBuffer: true, antialias: false }}
+          gl={{ 
+            preserveDrawingBuffer: true, 
+            antialias: false,
+            premultipliedAlpha: false // Prevent color shifts in export
+          }}
           dpr={[1, 1]}
         >
           {currentTool === 'TERMINAL' ? <ShaderASCII /> : <ScreenQuad />}
