@@ -118,9 +118,9 @@ export function ShaderASCII() {
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, width, height)
     
-    // White text
+    // White text - reduced size to prevent clipping
     ctx.fillStyle = '#ffffff'
-    ctx.font = `bold ${charSize * 0.8}px 'Space Mono', monospace`
+    ctx.font = `bold ${charSize * 0.65}px 'Space Mono', monospace`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     
