@@ -29,6 +29,7 @@ interface AppState {
   dm_strength: number
   dm_scale: number
   dm_contrast: number
+  dm_color_noise: number
   
   isExporting: boolean
   isFullscreen: boolean
@@ -53,6 +54,7 @@ interface AppState {
   setDmStrength: (strength: number) => void
   setDmScale: (scale: number) => void
   setDmContrast: (contrast: number) => void
+  setDmColorNoise: (noise: number) => void
   setIsExporting: (isExporting: boolean) => void
   setIsFullscreen: (isFullscreen: boolean) => void
   // History
@@ -84,6 +86,7 @@ const getHistoryState = (state: AppState): Partial<AppState> => ({
   dm_strength: state.dm_strength,
   dm_scale: state.dm_scale,
   dm_contrast: state.dm_contrast,
+  dm_color_noise: state.dm_color_noise,
 })
 
 export const useStore = create<AppState>()(persist((set, get) => ({
@@ -110,6 +113,7 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   dm_strength: 0.5,
   dm_scale: 1.0,
   dm_contrast: 1.0,
+  dm_color_noise: 0.0,
   
   isExporting: false,
   isFullscreen: false,
@@ -177,6 +181,7 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   setDmStrength: (strength) => set({ dm_strength: strength }),
   setDmScale: (scale) => set({ dm_scale: scale }),
   setDmContrast: (contrast) => set({ dm_contrast: contrast }),
+  setDmColorNoise: (noise) => set({ dm_color_noise: noise }),
   
   setIsExporting: (isExporting) => set({ isExporting }),
   setIsFullscreen: (isFullscreen) => set({ isFullscreen }),
@@ -202,5 +207,6 @@ export const useStore = create<AppState>()(persist((set, get) => ({
     dm_strength: state.dm_strength,
     dm_scale: state.dm_scale,
     dm_contrast: state.dm_contrast,
+    dm_color_noise: state.dm_color_noise,
   })
 }))

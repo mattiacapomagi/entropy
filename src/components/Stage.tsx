@@ -266,7 +266,7 @@ const datamoshFragmentShader = `
 uniform sampler2D uTexture;
 uniform float uDmStrength;
 uniform float uDmScale;
-uniform float uDmContrast;
+uniform float uDmColorNoise;
 varying vec2 vUv;
 
 float random(vec2 st) {
@@ -288,14 +288,29 @@ void main() {
   vec2 uv = vUv;
   
   // Create block grid
-  float blocks = 20.0 * uDmScale;
+  // INVERTED SCALE: Higher value = Larger blocks (fewer blocks)
+  // Range 0.1 - 2.0. 
+  // 0.1 -> 50.0 blocks (Small)
+  // 2.0 -> 2.5 blocks (Huge)
+  float blocks = 50.0 / (uDmScale * 10.0); 
+  // Wait, if uDmScale is 0.1 -> 500 / 1 = 500 blocks.
+  // If uDmScale is 2.0 -> 500 / 20 = 25 blocks.
+  // Let's try:
+  blocks = 50.0 / uDmScale;
+
   vec2 blockUv = floor(uv * blocks) / blocks;
   
   // Generate noise for displacement
-  float n = noise(blockUv * 5.0 + uDmContrast);
+  // INVERTED CONTRAST: Higher value = Sharper transitions
+  // Previous was: pow(n, uDmContrast). If contrast > 1, it gets sharper.
+  // User said it was inverted. So maybe they want Higher Value = More Contrast?
+  // If they said it works "al contrario", maybe they felt higher value made it softer?
+  // Let's stick to standard: pow(n, uDmContrast). If uDmContrast increases, midtones get pushed to 0 or 1.
+  // Maybe they want the *displacement* to be more binary?
+  // Let's try to make it very sharp at high values.
   
-  // Contrast curve for noise
-  n = pow(n, uDmContrast);
+  float n = noise(blockUv * 5.0 + uDmContrast);
+  n = pow(n, uDmContrast); 
   
   // Calculate displacement vector
   vec2 displacement = vec2(
@@ -312,6 +327,13 @@ void main() {
   // Add some digital artifacts/noise
   float artifact = random(uv * 100.0) * uDmStrength * 0.1;
   color.rgb += artifact;
+  
+  // COLOR INVERSION / SHIFT
+  // Invert colors in random blocks based on uDmColorNoise threshold
+  float blockRandom = random(blockUv + 50.0);
+  if (blockRandom < uDmColorNoise) {
+    color.rgb = 1.0 - color.rgb;
+  }
   
   gl_FragColor = color;
 }
@@ -340,6 +362,7 @@ const ScreenQuad = memo(function ScreenQuad() {
   const dm_strength = useStore((state) => state.dm_strength)
   const dm_scale = useStore((state) => state.dm_scale)
   const dm_contrast = useStore((state) => state.dm_contrast)
+  const dm_color_noise = useStore((state) => state.dm_color_noise)
   const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   
@@ -423,6 +446,7 @@ const ScreenQuad = memo(function ScreenQuad() {
     uDmStrength: { value: 0.0 },
     uDmScale: { value: 1.0 },
     uDmContrast: { value: 1.0 },
+    uDmColorNoise: { value: 0.0 },
     uImageResolution: { value: new THREE.Vector2(1, 1) },
     uHasImage: { value: false },
     uTime: { value: 0 }
@@ -466,6 +490,7 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uDmStrength.value = dm_strength
       materialRef.current.uniforms.uDmScale.value = dm_scale
       materialRef.current.uniforms.uDmContrast.value = dm_contrast
+      materialRef.current.uniforms.uDmColorNoise.value = dm_color_noise
     }
 
     if (isExporting && texture && texture.image && exportCameraRef.current) {

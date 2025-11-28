@@ -94,6 +94,7 @@ export function LabOverlay() {
   const dm_strength = useStore((state) => state.dm_strength)
   const dm_scale = useStore((state) => state.dm_scale)
   const dm_contrast = useStore((state) => state.dm_contrast)
+  const dm_color_noise = useStore((state) => state.dm_color_noise)
 
   const setDitherStrength = useStore((state) => state.setDitherStrength)
   const setDitherScale = useStore((state) => state.setDitherScale)
@@ -113,6 +114,7 @@ export function LabOverlay() {
   const setDmStrength = useStore((state) => state.setDmStrength)
   const setDmScale = useStore((state) => state.setDmScale)
   const setDmContrast = useStore((state) => state.setDmContrast)
+  const setDmColorNoise = useStore((state) => state.setDmColorNoise)
   
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
@@ -400,7 +402,8 @@ export function LabOverlay() {
               )}
             </div>
 
-            {/* ADJUST */}
+            {/* ADJUST - Hide in Datamosh mode */}
+            {currentTool !== 'DATAMOSH' && (
             <div className="border-2 border-[#f27200] p-3 bg-black text-white">
               <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-[#f27200] pb-2">
                 ADJUST
@@ -447,6 +450,7 @@ export function LabOverlay() {
                 </div>
               ))}
             </div>
+            )}
 
             {/* DATAMOSH CONTROLS */}
             {currentTool === 'DATAMOSH' && (
@@ -457,8 +461,9 @@ export function LabOverlay() {
                 
                 {[
                   { label: 'STRENGTH', value: dm_strength, setter: setDmStrength, min: 0, max: 1, step: 0.01, def: 0.5 },
-                  { label: 'SCALE', value: dm_scale, setter: setDmScale, min: 0.1, max: 2, step: 0.1, def: 1.0 },
+                  { label: 'BLOCK SIZE', value: dm_scale, setter: setDmScale, min: 0.1, max: 2, step: 0.1, def: 1.0 },
                   { label: 'CONTRAST', value: dm_contrast, setter: setDmContrast, min: 0.1, max: 5, step: 0.1, def: 1.0 },
+                  { label: 'COLOR SHIFT', value: dm_color_noise, setter: setDmColorNoise, min: 0, max: 1, step: 0.01, def: 0.0 },
                 ].map(({ label, value, setter, min, max, step, def }) => (
                   <div key={label} className="mb-3">
                     <div className="flex justify-between mb-1">
