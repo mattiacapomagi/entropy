@@ -67,10 +67,9 @@ Rendering is performed using a single full-screen quad (`ScreenQuad`) with a cus
 - **Datamosh Tool:**
   - **Block Size:** Control the granularity of the glitch (from tiny noise to huge blocks).
   - **Density:** Adjust the percentage of the image affected by the distortion.
-  - **Edge Blur:** Soften the edges of the blocks for a liquid/melting effect.
   - **Color Shift:** Invert colors of displaced blocks for a "corrupted file" aesthetic.
-  - **Seed:** Randomize the noise pattern with a text seed.
-  - **Size Variation:** Deform the grid to create irregular, non-uniform block sizes.
+  - **Seed:** Randomize the noise pattern with a text seed (max 16 chars).
+  - **Size Variation:** Randomly vary the size of individual blocks (non-uniform grid).
 - **Palette System:** Custom 4-color palettes + Presets.
 - **State Persistence:** Reloading the page retains your settings and tool position.
 - **History:** Robust Undo/Redo system for all parameters.

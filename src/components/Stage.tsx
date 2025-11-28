@@ -545,10 +545,12 @@ const ScreenQuad = memo(function ScreenQuad() {
       // Simple string hash for seed
       let seedVal = 0;
       for (let i = 0; i < dm_seed.length; i++) {
-        seedVal = (seedVal << 5) - seedVal + dm_seed.charCodeAt(i);
-        seedVal |= 0;
+        seedVal = ((seedVal << 5) - seedVal) + dm_seed.charCodeAt(i);
+        seedVal |= 0; // Convert to 32bit integer
       }
-      materialRef.current.uniforms.uDmSeed.value = seedVal
+      // Normalize to a safe float range (0.0 - 1000.0) to avoid GLSL precision issues with sin()
+      const safeSeed = (Math.abs(seedVal) % 100000) / 100.0;
+      materialRef.current.uniforms.uDmSeed.value = safeSeed
       materialRef.current.uniforms.uDmSizeVariation.value = dm_size_variation
     }
 
