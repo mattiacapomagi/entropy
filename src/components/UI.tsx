@@ -206,6 +206,10 @@ export function LabOverlay() {
               DATAMOSH [COMING SOON]
             </button>
           </div>
+          
+          <div className="mt-12 text-white/50 text-xs md:text-sm font-bold uppercase tracking-widest text-center">
+            © 2025 MATTIA CAPOMAGI
+          </div>
         </div>
       </div>
     )
@@ -227,9 +231,10 @@ export function LabOverlay() {
         <div className="flex items-center gap-4 md:gap-6">
           <button
             onClick={() => setCurrentTool('MENU')}
-            className="text-white text-base md:text-lg font-bold uppercase tracking-wider hover:text-[#f27200]"
+            className="text-white hover:text-[#f27200] transition-colors"
+            title="Back to Menu"
           >
-            ◄ MENU
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
           <div className="text-[#f27200] text-lg md:text-xl font-bold uppercase tracking-widest">
             ENTROPY
@@ -252,8 +257,7 @@ export function LabOverlay() {
               onDrop={handleDrop}
               className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-[#f27200]/30 m-8 md:m-12 cursor-pointer hover:border-[#f27200]"
             >
-              <div className="text-[#f27200] text-4xl md:text-5xl font-bold mb-4 md:mb-6">↑</div>
-              <div className="text-[#f27200] text-xl md:text-2xl font-bold uppercase tracking-widest">DROP IMAGE</div>
+              <div className="text-[#f27200] text-xl md:text-2xl font-bold uppercase tracking-widest">RELEASE IMAGE HERE</div>
               <div className="text-[#f27200]/50 text-base md:text-lg font-bold uppercase mt-2 md:mt-3">OR CLICK</div>
             </div>
           ) : (
