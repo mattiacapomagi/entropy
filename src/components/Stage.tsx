@@ -268,9 +268,11 @@ uniform float uDmStrength;
 uniform float uDmScale;
 uniform float uDmContrast;
 uniform float uDmColorNoise;
-uniform float uDmEdgeBlur;
 uniform float uDmSeed;
 uniform float uDmSizeVariation;
+// Palette Uniforms
+uniform vec3 uPalette[4];
+uniform bool uUsePalette;
 varying vec2 vUv;
 
 float random(vec2 st) {
@@ -288,82 +290,93 @@ float noise(vec2 st) {
     return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
+// Helper for palette mapping
+vec3 mapToPalette(vec3 color) {
+  float minDist = 1000.0;
+  vec3 closestColor = color;
+  
+  for (int i = 0; i < 4; i++) {
+    float dist = distance(color, uPalette[i]);
+    if (dist < minDist) {
+      minDist = dist;
+      closestColor = uPalette[i];
+    }
+  }
+  return closestColor;
+}
+
 void main() {
   vec2 uv = vUv;
   
-  // SIZE VARIATION: Distort UVs before blocking to create irregular grid sizes
-  // We use low frequency noise to warp the space.
-  // uDmSizeVariation 0.0 -> Uniform grid
-  // uDmSizeVariation 0.5 -> Highly warped grid (some blocks big, some small)
-  vec2 warp = vec2(
-    noise(uv * 2.0 + uDmSeed),
-    noise(uv * 2.0 + uDmSeed + 10.0)
-  );
-  vec2 warpedUv = uv + (warp - 0.5) * uDmSizeVariation;
+  // SIZE VARIATION: Randomly change block size for individual blocks
+  // Instead of warping, we can use a noise threshold to decide if a block 
+  // should be subdivided or merged.
+  // Simpler approach: Calculate block UVs at two scales.
+  // Scale A: Base scale (uDmScale)
+  // Scale B: Larger scale (uDmScale * 0.5)
+  // Use noise to mix between them per-pixel? No, that blurs.
+  // We need to decide for a region which scale to use.
   
-  // Create block grid using warped UVs
-  // BLOCK SIZE: Higher uDmScale = Larger blocks (Lower frequency)
-  // uDmScale 0.01 -> blocks = 5000 (Tiny)
-  // uDmScale 5.0 -> blocks = 10 (Huge)
-  float blocks = 50.0 / uDmScale;
-
-  vec2 blockUv = floor(warpedUv * blocks) / blocks;
+  float baseBlocks = 50.0 / uDmScale;
   
-  // EDGE BLUR: Mix between stepped (Blocky) and smooth (Liquid) displacement
-  // We calculate two noise values: one based on blocks, one continuous.
+  // Calculate a "Scale Map" using low-freq noise driven by Seed
+  // If noise > threshold, use larger blocks.
+  // uDmSizeVariation controls the threshold/mix.
+  float scaleNoise = noise(floor(uv * baseBlocks * 0.2) + uDmSeed);
   
-  // 1. Stepped Noise (Blocky)
-  vec2 noiseUvStepped = blockUv * 5.0;
-  float nStepped = noise(noiseUvStepped);
+  // If variation is high, we allow more large blocks.
+  // But we want "random size of single block".
+  // Let's try:
+  float currentBlocks = baseBlocks;
   
-  // 2. Smooth Noise (Liquid)
-  vec2 noiseUvSmooth = uv * 5.0; 
+  // If random check passes, use half density (double size)
+  if (scaleNoise < uDmSizeVariation) {
+     currentBlocks = baseBlocks * 0.5;
+  }
+  
+  vec2 blockUv = floor(uv * currentBlocks) / currentBlocks;
   
   // DENSITY (formerly Contrast): Percentage of image affected.
   // uDmContrast is now 0.0 to 1.0.
   // We use it as a threshold.
   // We want to create a mask.
-  float maskNoise = noise(blockUv * 3.14 + 10.0); // Different seed
-  // If uDmContrast is 1.0, we want ALL blocks. step(0.0, mask) -> 1.
-  // If uDmContrast is 0.0, we want NO blocks. step(1.0, mask) -> 0.
+  // SEED: Add uDmSeed to the noise lookup
+  float maskNoise = noise(blockUv * 3.14 + 10.0 + uDmSeed); 
+  
   // Threshold = 1.0 - uDmContrast.
   float densityThreshold = 1.0 - uDmContrast;
   float densityMask = step(densityThreshold, maskNoise);
   
   // Calculate Displacement Vectors
   // Stepped (Hard Blocks)
+  // SEED: Add uDmSeed to random calls
   vec2 dispStepped = vec2(
-    (random(blockUv) - 0.5) * 2.0,
-    (random(blockUv + 100.0) - 0.5) * 2.0
+    (random(blockUv + uDmSeed) - 0.5) * 2.0,
+    (random(blockUv + 100.0 + uDmSeed) - 0.5) * 2.0
   );
-  
-  // Smooth (Liquid/Melting) - Use Value Noise for smooth transitions
-  // We need a smooth random vector field.
-  vec2 dispSmooth = vec2(
-    (noise(uv * blocks) - 0.5) * 2.0,
-    (noise(uv * blocks + 100.0) - 0.5) * 2.0
-  );
-  
-  // Mix based on Edge Blur
-  vec2 finalDisp = mix(dispStepped, dispSmooth, uDmEdgeBlur);
   
   // Apply displacement
-  vec2 displacedUv = uv + finalDisp * uDmStrength * densityMask * 0.1;
+  vec2 displacedUv = uv + dispStepped * uDmStrength * densityMask * 0.1;
   
   // Sample texture
   vec4 color = texture2D(uTexture, displacedUv);
   
   // Add artifacts
-  float artifact = random(uv * 100.0) * uDmStrength * 0.1 * densityMask;
+  float artifact = random(uv * 100.0 + uDmSeed) * uDmStrength * 0.1 * densityMask;
   color.rgb += artifact;
   
   // COLOR INVERSION / SHIFT
   // Apply only where mask is active
   if (densityMask > 0.5) {
-    float blockRandom = random(blockUv + 50.0);
+    float blockRandom = random(blockUv + 50.0 + uDmSeed);
     if (blockRandom < uDmColorNoise) {
       color.rgb = 1.0 - color.rgb;
     }
+  }
+  
+  // PALETTE MAPPING
+  if (uUsePalette) {
+    color.rgb = mapToPalette(color.rgb);
   }
   
   gl_FragColor = color;
@@ -394,7 +407,6 @@ const ScreenQuad = memo(function ScreenQuad() {
   const dm_scale = useStore((state) => state.dm_scale)
   const dm_contrast = useStore((state) => state.dm_contrast)
   const dm_color_noise = useStore((state) => state.dm_color_noise)
-  const dm_edge_blur = useStore((state) => state.dm_edge_blur)
   const dm_seed = useStore((state) => state.dm_seed)
   const dm_size_variation = useStore((state) => state.dm_size_variation)
   const isExporting = useStore((state) => state.isExporting)
@@ -475,13 +487,13 @@ const ScreenQuad = memo(function ScreenQuad() {
     uColorMode: { value: 0 },
     uTintHue: { value: 20.0 },
     uPalette: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] },
+    uUsePalette: { value: false },
     
     // Datamosh Uniforms
     uDmStrength: { value: 0.0 },
     uDmScale: { value: 1.0 },
     uDmContrast: { value: 1.0 },
     uDmColorNoise: { value: 0.0 },
-    uDmEdgeBlur: { value: 0.0 },
     uDmSeed: { value: 0.0 },
     uDmSizeVariation: { value: 0.0 },
     uImageResolution: { value: new THREE.Vector2(1, 1) },
@@ -523,12 +535,12 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uColorMode.value = colorMode
       materialRef.current.uniforms.uTintHue.value = tintHue
       materialRef.current.uniforms.uPalette.value = paletteUniform
+      materialRef.current.uniforms.uUsePalette.value = colorMode === 2 // 2 is PALETTE mode
       
       materialRef.current.uniforms.uDmStrength.value = dm_strength
       materialRef.current.uniforms.uDmScale.value = dm_scale
       materialRef.current.uniforms.uDmContrast.value = dm_contrast
       materialRef.current.uniforms.uDmColorNoise.value = dm_color_noise
-      materialRef.current.uniforms.uDmEdgeBlur.value = dm_edge_blur
       
       // Simple string hash for seed
       let seedVal = 0;

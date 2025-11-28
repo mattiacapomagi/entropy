@@ -30,7 +30,6 @@ interface AppState {
   dm_scale: number
   dm_contrast: number
   dm_color_noise: number
-  dm_edge_blur: number
   dm_seed: string
   dm_size_variation: number
   
@@ -58,7 +57,6 @@ interface AppState {
   setDmScale: (scale: number) => void
   setDmContrast: (contrast: number) => void
   setDmColorNoise: (noise: number) => void
-  setDmEdgeBlur: (blur: number) => void
   setDmSeed: (seed: string) => void
   setDmSizeVariation: (variation: number) => void
   setIsExporting: (isExporting: boolean) => void
@@ -93,7 +91,6 @@ const getHistoryState = (state: AppState): Partial<AppState> => ({
   dm_scale: state.dm_scale,
   dm_contrast: state.dm_contrast,
   dm_color_noise: state.dm_color_noise,
-  dm_edge_blur: state.dm_edge_blur,
   dm_seed: state.dm_seed,
   dm_size_variation: state.dm_size_variation,
 })
@@ -123,7 +120,6 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   dm_scale: 1.0,
   dm_contrast: 1.0,
   dm_color_noise: 0.0,
-  dm_edge_blur: 0.0,
   dm_seed: 'ENTROPY',
   dm_size_variation: 0.0,
   
@@ -194,7 +190,6 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   setDmScale: (scale) => set({ dm_scale: scale }),
   setDmContrast: (contrast) => set({ dm_contrast: contrast }),
   setDmColorNoise: (noise) => set({ dm_color_noise: noise }),
-  setDmEdgeBlur: (blur) => set({ dm_edge_blur: blur }),
   setDmSeed: (seed) => set({ dm_seed: seed }),
   setDmSizeVariation: (variation) => set({ dm_size_variation: variation }),
   
@@ -223,7 +218,6 @@ export const useStore = create<AppState>()(persist((set, get) => ({
     dm_scale: state.dm_scale,
     dm_contrast: state.dm_contrast,
     dm_color_noise: state.dm_color_noise,
-    dm_edge_blur: state.dm_edge_blur,
     dm_seed: state.dm_seed,
     dm_size_variation: state.dm_size_variation,
   })
