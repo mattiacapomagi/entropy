@@ -590,16 +590,26 @@ const ScreenQuad = memo(function ScreenQuad() {
     }
 
     if (isExporting && texture && texture.image && exportCameraRef.current) {
+      console.log('[STAGE] Export triggered')
+      console.log('[STAGE] currentTool:', currentTool)
+      console.log('[STAGE] exportFormat:', exportFormat)
+      console.log('[STAGE] texture:', texture)
+      console.log('[STAGE] texture.image:', texture.image)
+      
       const img = texture.image as HTMLImageElement
       const originalWidth = img.width
       const originalHeight = img.height
       const currentWidth = state.size.width
       const currentHeight = state.size.height
       
+      console.log('[STAGE] Image dimensions:', { originalWidth, originalHeight, currentWidth, currentHeight })
+      
       // TERMINAL EXPORT
       if (currentTool === 'TERMINAL') {
+         console.log('[STAGE] Terminal export mode')
          // SVG EXPORT
          if (exportFormat === 'SVG') {
+           console.log('[STAGE] SVG export requested')
            // Create a canvas to read pixel data
            const canvas = document.createElement('canvas')
            canvas.width = originalWidth
@@ -659,13 +669,16 @@ const ScreenQuad = memo(function ScreenQuad() {
              document.body.appendChild(link)
              link.click()
              document.body.removeChild(link)
+             console.log('[STAGE] SVG export completed')
              setTimeout(() => URL.revokeObjectURL(url), 100)
            }
            
+           console.log('[STAGE] Setting isExporting to false')
            setIsExporting(false)
            return // Skip PNG export for SVG
          }
          
+         console.log('[STAGE] PNG/PNG_TRANSPARENT export for Terminal')
          // For PNG and PNG_TRANSPARENT, continue to standard export
          // The shader will handle transparency based on uTransparent uniform
       }

@@ -264,8 +264,11 @@ export function LabOverlay() {
             <div className="flex gap-2">
               <button 
                 onClick={() => {
+                  console.log('[EXPORT] PNG button clicked')
+                  console.log('[EXPORT] Current isExporting:', isExporting)
                   setExportFormat('PNG')
                   setIsExporting(true)
+                  console.log('[EXPORT] Set exportFormat to PNG, isExporting to true')
                 }}
                 disabled={isExporting}
                 className="bg-[#f27200] text-black px-2 py-1 text-[10px] md:text-xs font-bold hover:bg-white hover:text-black disabled:opacity-50 uppercase"
@@ -274,6 +277,7 @@ export function LabOverlay() {
               </button>
               <button 
                 onClick={() => {
+                  console.log('[EXPORT] PNG ALPHA button clicked')
                   setExportFormat('PNG_TRANSPARENT')
                   setIsExporting(true)
                 }}
@@ -284,6 +288,7 @@ export function LabOverlay() {
               </button>
               <button 
                 onClick={() => {
+                  console.log('[EXPORT] SVG button clicked')
                   setExportFormat('SVG')
                   setIsExporting(true)
                 }}
