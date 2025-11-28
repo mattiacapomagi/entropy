@@ -96,6 +96,8 @@ export function LabOverlay() {
   const dm_contrast = useStore((state) => state.dm_contrast)
   const dm_color_noise = useStore((state) => state.dm_color_noise)
   const dm_edge_blur = useStore((state) => state.dm_edge_blur)
+  const dm_seed = useStore((state) => state.dm_seed)
+  const dm_size_variation = useStore((state) => state.dm_size_variation)
 
   const setDitherStrength = useStore((state) => state.setDitherStrength)
   const setDitherScale = useStore((state) => state.setDitherScale)
@@ -117,6 +119,8 @@ export function LabOverlay() {
   const setDmContrast = useStore((state) => state.setDmContrast)
   const setDmColorNoise = useStore((state) => state.setDmColorNoise)
   const setDmEdgeBlur = useStore((state) => state.setDmEdgeBlur)
+  const setDmSeed = useStore((state) => state.setDmSeed)
+  const setDmSizeVariation = useStore((state) => state.setDmSizeVariation)
   
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
@@ -461,9 +465,39 @@ export function LabOverlay() {
                   DATAMOSH
                 </div>
                 
+                {/* Seed Input */}
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-sm font-bold">SEED</label>
+                    <button 
+                      onClick={() => {
+                        setDmSeed(Math.random().toString(36).substring(7).toUpperCase())
+                        pushToHistory()
+                      }}
+                      className="text-xs underline hover:text-white"
+                    >
+                      RANDOMIZE
+                    </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    value={dm_seed}
+                    onChange={(e) => {
+                      setDmSeed(e.target.value)
+                      // Debounce history push? For text it's tricky. 
+                      // Let's just push on blur or enter? 
+                      // For now, simple onChange is fine, but maybe too many history states.
+                      // Let's rely on user explicit randomize or typing.
+                    }}
+                    onBlur={pushToHistory}
+                    className="w-full bg-black border border-black text-white p-2 font-mono text-sm focus:outline-none focus:border-white uppercase"
+                  />
+                </div>
+
                 {[
                   { label: 'STRENGTH', value: dm_strength, setter: setDmStrength, min: 0, max: 1, step: 0.01, def: 0.5 },
                   { label: 'BLOCK SIZE', value: dm_scale, setter: setDmScale, min: 0.01, max: 5, step: 0.01, def: 1.0 },
+                  { label: 'SIZE VARIATION', value: dm_size_variation, setter: setDmSizeVariation, min: 0, max: 0.5, step: 0.01, def: 0.0 },
                   { label: 'DENSITY', value: dm_contrast, setter: setDmContrast, min: 0.0, max: 1.0, step: 0.01, def: 1.0 },
                   { label: 'EDGE BLUR', value: dm_edge_blur, setter: setDmEdgeBlur, min: 0, max: 1, step: 0.01, def: 0.0 },
                   { label: 'COLOR SHIFT', value: dm_color_noise, setter: setDmColorNoise, min: 0, max: 1, step: 0.01, def: 0.0 },

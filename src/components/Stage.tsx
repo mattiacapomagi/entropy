@@ -269,10 +269,12 @@ uniform float uDmScale;
 uniform float uDmContrast;
 uniform float uDmColorNoise;
 uniform float uDmEdgeBlur;
+uniform float uDmSeed;
+uniform float uDmSizeVariation;
 varying vec2 vUv;
 
 float random(vec2 st) {
-    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233) + uDmSeed)) * 43758.5453123);
 }
 
 float noise(vec2 st) {
@@ -289,13 +291,23 @@ float noise(vec2 st) {
 void main() {
   vec2 uv = vUv;
   
-  // Create block grid
+  // SIZE VARIATION: Distort UVs before blocking to create irregular grid sizes
+  // We use low frequency noise to warp the space.
+  // uDmSizeVariation 0.0 -> Uniform grid
+  // uDmSizeVariation 0.5 -> Highly warped grid (some blocks big, some small)
+  vec2 warp = vec2(
+    noise(uv * 2.0 + uDmSeed),
+    noise(uv * 2.0 + uDmSeed + 10.0)
+  );
+  vec2 warpedUv = uv + (warp - 0.5) * uDmSizeVariation;
+  
+  // Create block grid using warped UVs
   // BLOCK SIZE: Higher uDmScale = Larger blocks (Lower frequency)
   // uDmScale 0.01 -> blocks = 5000 (Tiny)
   // uDmScale 5.0 -> blocks = 10 (Huge)
   float blocks = 50.0 / uDmScale;
 
-  vec2 blockUv = floor(uv * blocks) / blocks;
+  vec2 blockUv = floor(warpedUv * blocks) / blocks;
   
   // EDGE BLUR: Mix between stepped (Blocky) and smooth (Liquid) displacement
   // We calculate two noise values: one based on blocks, one continuous.
@@ -305,13 +317,7 @@ void main() {
   float nStepped = noise(noiseUvStepped);
   
   // 2. Smooth Noise (Liquid)
-  vec2 noiseUvSmooth = uv * 5.0; // Use original UVs but scaled same as blocks? 
-  // Actually, to match the scale, we should use uv * blocks? 
-  // But blocks depends on scale. Let's try to keep frequency similar.
-  // If we use uv * blocks, it will be high frequency if blocks is high.
-  // Let's mix the COORDINATES first, that's cheaper and usually cleaner.
-  // But user said "edge blur non funziona bene".
-  // Let's try mixing the RESULTING DISPLACEMENT.
+  vec2 noiseUvSmooth = uv * 5.0; 
   
   // DENSITY (formerly Contrast): Percentage of image affected.
   // uDmContrast is now 0.0 to 1.0.
@@ -340,11 +346,6 @@ void main() {
   
   // Mix based on Edge Blur
   vec2 finalDisp = mix(dispStepped, dispSmooth, uDmEdgeBlur);
-  
-  // Apply Density Mask (only to displacement strength)
-  // We can smooth the mask too if Edge Blur is high?
-  // Maybe keep mask sharp for "Datamosh" feel, or let it be part of the chaos.
-  // Let's keep it sharp for now, as datamosh is usually glitchy.
   
   // Apply displacement
   vec2 displacedUv = uv + finalDisp * uDmStrength * densityMask * 0.1;
@@ -394,6 +395,8 @@ const ScreenQuad = memo(function ScreenQuad() {
   const dm_contrast = useStore((state) => state.dm_contrast)
   const dm_color_noise = useStore((state) => state.dm_color_noise)
   const dm_edge_blur = useStore((state) => state.dm_edge_blur)
+  const dm_seed = useStore((state) => state.dm_seed)
+  const dm_size_variation = useStore((state) => state.dm_size_variation)
   const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   
@@ -479,6 +482,8 @@ const ScreenQuad = memo(function ScreenQuad() {
     uDmContrast: { value: 1.0 },
     uDmColorNoise: { value: 0.0 },
     uDmEdgeBlur: { value: 0.0 },
+    uDmSeed: { value: 0.0 },
+    uDmSizeVariation: { value: 0.0 },
     uImageResolution: { value: new THREE.Vector2(1, 1) },
     uHasImage: { value: false },
     uTime: { value: 0 }
@@ -524,6 +529,15 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uDmContrast.value = dm_contrast
       materialRef.current.uniforms.uDmColorNoise.value = dm_color_noise
       materialRef.current.uniforms.uDmEdgeBlur.value = dm_edge_blur
+      
+      // Simple string hash for seed
+      let seedVal = 0;
+      for (let i = 0; i < dm_seed.length; i++) {
+        seedVal = (seedVal << 5) - seedVal + dm_seed.charCodeAt(i);
+        seedVal |= 0;
+      }
+      materialRef.current.uniforms.uDmSeed.value = seedVal
+      materialRef.current.uniforms.uDmSizeVariation.value = dm_size_variation
     }
 
     if (isExporting && texture && texture.image && exportCameraRef.current) {
