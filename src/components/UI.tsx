@@ -656,9 +656,9 @@ export function LabOverlay() {
                     value={(() => {
                       // Map current density to slider value
                       const pixelSize = Math.round(1000 / asciiDensity)
-                      // Pixel sizes: 5, 7, 9, 11, 13, 15, 17, 19, 20, 20
-                      // Map pixel to slider: 5->1, 7->2, 9->3, 11->4, 13->5, 15->6, 17->7, 19->8, 20->9
-                      const pixelSizes = [5, 7, 9, 11, 13, 15, 17, 19, 20, 20]
+                      // Pixel sizes: 5, 6, 8, 10, 11, 13, 15, 16, 18, 20
+                      // Map pixel to slider: 1-10
+                      const pixelSizes = [5, 6, 8, 10, 11, 13, 15, 16, 18, 20]
                       const closestIndex = pixelSizes.reduce((prev, curr, idx) => 
                         Math.abs(curr - pixelSize) < Math.abs(pixelSizes[prev] - pixelSize) ? idx : prev
                       , 0)
@@ -668,7 +668,7 @@ export function LabOverlay() {
                     onChange={(e) => {
                       const sliderValue = parseInt(e.target.value)
                       // Map slider (1-10) to pixel sizes
-                      const pixelSizes = [5, 7, 9, 11, 13, 15, 17, 19, 20, 20]
+                      const pixelSizes = [5, 6, 8, 10, 11, 13, 15, 16, 18, 20]
                       const pixelSize = pixelSizes[sliderValue - 1]
                       // Convert pixel size to density
                       const density = Math.round(1000 / pixelSize)
