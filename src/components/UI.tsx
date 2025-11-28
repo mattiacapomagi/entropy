@@ -111,6 +111,7 @@ export function LabOverlay() {
   const setIsFullscreen = useStore((state) => state.setIsFullscreen)
   const setImage = useStore((state) => state.setImage)
   const imageURL = useStore((state) => state.imageURL)
+  const pushToHistory = useStore((state) => state.pushToHistory)
   
   const [customColorCount, setCustomColorCount] = useState(4)
   const [selectedPreset, setSelectedPreset] = useState('')
@@ -290,7 +291,10 @@ export function LabOverlay() {
               
               <select
                 value={colorMode}
-                onChange={(e) => setColorMode(parseInt(e.target.value))}
+                onChange={(e) => {
+                  pushToHistory()
+                  setColorMode(parseInt(e.target.value))
+                }}
                 className="w-full bg-[#f27200] text-black border-2 border-[#f27200] p-2 font-bold text-sm uppercase"
               >
                 {COLOR_MODES.map(mode => (
@@ -304,7 +308,10 @@ export function LabOverlay() {
                     <span className="font-medium uppercase text-xs">HUE</span>
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => setTintHue(20)}
+                        onClick={() => {
+                          pushToHistory()
+                          setTintHue(20)
+                        }}
                         className="text-[10px] font-bold uppercase text-[#f27200] hover:text-white"
                       >
                         RESET
@@ -317,6 +324,7 @@ export function LabOverlay() {
                     min="0"
                     max="360"
                     value={tintHue}
+                    onPointerDown={pushToHistory}
                     onChange={(e) => setTintHue(parseFloat(e.target.value))}
                     className="w-full h-6 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />
@@ -328,6 +336,7 @@ export function LabOverlay() {
                   <select
                     value={selectedPreset}
                     onChange={(e) => {
+                      pushToHistory()
                       setSelectedPreset(e.target.value)
                       const preset = PALETTE_PRESETS.find(p => p.name === e.target.value)
                       if (preset) {
@@ -369,6 +378,7 @@ export function LabOverlay() {
                         key={index}
                         type="color"
                         value={color}
+                        onPointerDown={pushToHistory}
                         onChange={(e) => updatePaletteColor(index, e.target.value)}
                         className="w-full h-auto aspect-square border-2 border-[#f27200] cursor-pointer p-0 appearance-none rounded-none [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none"
                       />
@@ -400,7 +410,10 @@ export function LabOverlay() {
                     <span className="font-medium uppercase text-xs">{label}</span>
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => setter(def)}
+                        onClick={() => {
+                          pushToHistory()
+                          setter(def)
+                        }}
                         className="text-[10px] font-bold uppercase text-[#f27200] hover:text-white"
                         style={{ opacity: value === def ? 0 : 1, pointerEvents: value === def ? 'none' : 'auto' }}
                       >
@@ -415,6 +428,7 @@ export function LabOverlay() {
                     max={max}
                     step={1}
                     value={value}
+                    onPointerDown={pushToHistory}
                     onChange={(e) => setter(parseFloat(e.target.value))}
                     className="w-full h-5 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />
@@ -430,7 +444,10 @@ export function LabOverlay() {
               
               <select
                 value={ditherAlgorithm}
-                onChange={(e) => setDitherAlgorithm(parseInt(e.target.value))}
+                onChange={(e) => {
+                  pushToHistory()
+                  setDitherAlgorithm(parseInt(e.target.value))
+                }}
                 className="w-full bg-black text-white border-2 border-black p-2 font-bold text-sm uppercase mb-3"
               >
                 {DITHER_ALGORITHMS.map(algo => (
@@ -443,7 +460,10 @@ export function LabOverlay() {
                   <span className="font-medium uppercase text-xs">STRENGTH</span>
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => setDitherStrength(0.5)}
+                      onClick={() => {
+                        pushToHistory()
+                        setDitherStrength(0.5)
+                      }}
                       className="text-[10px] font-bold uppercase text-black hover:text-white"
                       style={{ opacity: ditherStrength === 0.5 ? 0 : 1, pointerEvents: ditherStrength === 0.5 ? 'none' : 'auto' }}
                     >
@@ -458,6 +478,7 @@ export function LabOverlay() {
                   max="1"
                   step="0.01"
                   value={ditherStrength}
+                  onPointerDown={pushToHistory}
                   onChange={(e) => setDitherStrength(parseFloat(e.target.value))}
                   className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                 />
@@ -468,7 +489,10 @@ export function LabOverlay() {
                   <span className="font-medium uppercase text-xs">SCALE</span>
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => setDitherScale(1.0)}
+                      onClick={() => {
+                        pushToHistory()
+                        setDitherScale(1.0)
+                      }}
                       className="text-[10px] font-bold uppercase text-black hover:text-white"
                       style={{ opacity: ditherScale === 1.0 ? 0 : 1, pointerEvents: ditherScale === 1.0 ? 'none' : 'auto' }}
                     >
@@ -483,6 +507,7 @@ export function LabOverlay() {
                   max="4"
                   step="0.1"
                   value={ditherScale}
+                  onPointerDown={pushToHistory}
                   onChange={(e) => setDitherScale(parseFloat(e.target.value))}
                   className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
                 />
