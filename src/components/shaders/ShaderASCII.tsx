@@ -39,11 +39,11 @@ void main() {
   float gray = dot(inputColor, vec3(0.299, 0.587, 0.114));
   
   // 3. Map Luminance to Character
-  // 70 characters total (from space to $)
-  float charIndex = floor(gray * 69.99);
+  // 43 characters total
+  float charIndex = floor(gray * 42.99);
   
   // 4. Calculate Character Texture UVs
-  float charWidth = 1.0 / 70.0;
+  float charWidth = 1.0 / 43.0;
   vec2 charUv = vec2(
     (cellUv.x * charWidth) + (charIndex * charWidth),
     cellUv.y
@@ -97,8 +97,9 @@ export function ShaderASCII() {
   // 2. Generate Procedural Character Texture
   useEffect(() => {
     const canvas = document.createElement('canvas')
-    // Character set ordered by visual density (light to dark)
-    const chars = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+    // Clean character set: letters, numbers, dots, commas, asterisks
+    // Ordered by visual density (light to dark)
+    const chars = " .,il1IrjtfLcvuxznsCJUYXQ0O8ZmwpbdhkaoMW*"
     const charSize = 400
     const width = charSize * chars.length
     const height = charSize
