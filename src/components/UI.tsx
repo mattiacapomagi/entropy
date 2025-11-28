@@ -137,7 +137,11 @@ export function LabOverlay() {
   const [selectedPreset, setSelectedPreset] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleExport = useCallback(() => setIsExporting(true), [setIsExporting])
+  const handleExport = useCallback(() => {
+    console.log('[UI] SAVE button clicked, calling setIsExporting(true)')
+    console.log('[UI] Current imageURL:', imageURL)
+    setIsExporting(true)
+  }, [setIsExporting, imageURL])
   const handleFileClick = useCallback(() => fileInputRef.current?.click(), [])
 
   const loadImageFile = useCallback((file: File) => {
@@ -738,7 +742,12 @@ export function LabOverlay() {
             CLEAR
           </button>
           <button
-            onClick={handleExport}
+            onClick={() => {
+              console.log('[UI] SAVE button CLICKED directly')
+              console.log('[UI] imageURL:', imageURL)
+              console.log('[UI] Button disabled?', !imageURL)
+              handleExport()
+            }}
             disabled={!imageURL}
             className="bg-[#f27200] text-black px-4 py-2 md:px-6 md:py-3 border-2 border-[#f27200] font-bold text-sm md:text-lg uppercase tracking-wider hover:bg-black hover:text-[#f27200] disabled:opacity-30 disabled:hover:bg-[#f27200]"
           >
