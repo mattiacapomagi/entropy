@@ -24,8 +24,14 @@ varying vec2 vUv;
 void main() {
   vec2 uv = vUv;
   
-  // 1. Pixelate / Grid Logic
-  vec2 grid = vec2(uDensity, uDensity * (uResolution.y / uResolution.x));
+  // 1. Pixelate / Grid Logic with SQUARE cells
+  // uDensity defines the number of columns
+  // Calculate rows to maintain square aspect ratio for cells
+  float aspect = uResolution.y / uResolution.x;
+  float cols = uDensity;
+  float rows = uDensity * aspect;
+  
+  vec2 grid = vec2(cols, rows);
   vec2 cellUv = fract(uv * grid);
   vec2 gridUv = floor(uv * grid) / grid;
   
@@ -107,7 +113,7 @@ export function ShaderASCII() {
     
     // White text
     ctx.fillStyle = '#ffffff'
-    ctx.font = `bold ${charSize * 0.8}px monospace` // Slightly smaller than box to avoid clipping
+    ctx.font = `bold ${charSize * 0.8}px 'Open Sans', sans-serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     

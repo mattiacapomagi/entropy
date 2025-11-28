@@ -639,9 +639,9 @@ export function LabOverlay() {
                       >
                         RESET
                       </button>
-                      {/* Display a "Size" value instead of raw density */}
-                      <span className="text-[#f27200] font-semibold text-sm w-8 text-right">
-                        {Math.round((1500 - asciiDensity) / 15)}%
+                      {/* Display approximate character height in pixels */}
+                      <span className="text-[#f27200] font-semibold text-sm w-12 text-right">
+                        {Math.round(1000 / asciiDensity)}px
                       </span>
                     </div>
                   </div>
