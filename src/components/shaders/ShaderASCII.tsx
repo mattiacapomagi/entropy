@@ -114,7 +114,7 @@ export function ShaderASCII() {
     
     // White text
     ctx.fillStyle = '#ffffff'
-    ctx.font = `bold ${charSize * 0.8}px 'Open Sans', sans-serif`
+    ctx.font = `bold ${charSize * 0.8}px 'Space Mono', monospace`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     
