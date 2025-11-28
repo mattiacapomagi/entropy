@@ -18,8 +18,7 @@ uniform sampler2D uCharTexture;
 uniform float uDensity;
 uniform vec3 uColor;
 uniform float uTransparent; // 0.0 = Opaque Black, 1.0 = Transparent
-uniform vec2 uResolution;
-varying vec2 vUv;
+uniform float uCharCount;
 
 void main() {
   vec2 uv = vUv;
@@ -39,16 +38,11 @@ void main() {
   float gray = dot(inputColor, vec3(0.299, 0.587, 0.114));
   
   // 3. Map Luminance to Character
-  // Character count depends on texture (43 for alphanumeric, 70 for special)
-  // We can infer it from the uCharTexture width, but for simplicity use fixed multipliers
-  // For now, assume max range and let the texture handle it
-  float charIndex = floor(gray * 69.99);  // Max for special set
+  // Use exact character count from uniform
+  float charIndex = floor(gray * (uCharCount - 0.01));
   
   // 4. Calculate Character Texture UVs
-  // CharTexture width varies: 43 for alphanumeric, 70 for special
-  // We need to calculate dynamically or pass as uniform
-  // For now, use max (70) - the texture will just show nothing for unused chars
-  float charWidth = 1.0 / 70.0;
+  float charWidth = 1.0 / uCharCount;
   vec2 charUv = vec2(
     (cellUv.x * charWidth) + (charIndex * charWidth),
     cellUv.y
@@ -105,7 +99,7 @@ export function ShaderASCII() {
     const canvas = document.createElement('canvas')
     // Full character set with letters, numbers, and symbols
     const chars = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
-    const charSize = 400
+    const charSize = 64 // Reduced from 400 to avoid max texture size limits (64 * 69 = 4416px < 16384px)
     const width = charSize * chars.length
     const height = charSize
     
@@ -134,10 +128,15 @@ export function ShaderASCII() {
     }
     
     const tex = new THREE.CanvasTexture(canvas)
-    tex.minFilter = THREE.LinearFilter
-    tex.magFilter = THREE.LinearFilter
+    tex.minFilter = THREE.NearestFilter // Use Nearest for crisp pixel-perfect edges
+    tex.magFilter = THREE.NearestFilter
     tex.needsUpdate = true
     setCharTexture(tex)
+    
+    // Update uniform with exact count
+    if (materialRef.current) {
+      materialRef.current.uniforms.uCharCount.value = chars.length
+    }
     
   }, [])
 
@@ -148,7 +147,8 @@ export function ShaderASCII() {
     uDensity: { value: 120 },
     uColor: { value: new THREE.Color(0x00ff00) },
     uTransparent: { value: 0.0 },
-    uResolution: { value: new THREE.Vector2(1, 1) }
+    uResolution: { value: new THREE.Vector2(1, 1) },
+    uCharCount: { value: 69.0 } // Default, updated by useEffect
   }), [])
 
   // 4. Update Loop + Export Logic
