@@ -126,7 +126,9 @@ export function LabOverlay() {
   const setAsciiDensity = useStore((state) => state.setAsciiDensity)
   const setAsciiColor = useStore((state) => state.setAsciiColor)
   
+  const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
+  const setExportFormat = useStore((state) => state.setExportFormat)
   const isFullscreen = useStore((state) => state.isFullscreen)
   const setIsFullscreen = useStore((state) => state.setIsFullscreen)
   const setImage = useStore((state) => state.setImage)
@@ -166,19 +168,6 @@ export function LabOverlay() {
     if (file) loadImageFile(file)
   }, [loadImageFile])
 
-  const hueToRGB = useCallback((hue: number) => {
-    const h = hue / 60
-    const c = 1
-    const x = c * (1 - Math.abs((h % 2) - 1))
-    let rgb = [0, 0, 0]
-    if (h >= 0 && h < 1) rgb = [c, x, 0]
-    else if (h >= 1 && h < 2) rgb = [x, c, 0]
-    else if (h >= 2 && h < 3) rgb = [0, c, x]
-    else if (h >= 3 && h < 4) rgb = [0, x, c]
-    else if (h >= 4 && h < 5) rgb = [x, 0, c]
-    else rgb = [c, 0, x]
-    return `rgb(${Math.round(rgb[0] * 255)}, ${Math.round(rgb[1] * 255)}, ${Math.round(rgb[2] * 255)})`
-  }, [])
 
   const updatePaletteColor = useCallback((index: number, color: string) => {
     const newPalette = [...paletteColors]
@@ -205,6 +194,7 @@ export function LabOverlay() {
           <h1 className="text-4xl md:text-6xl font-black mb-8 tracking-tight uppercase text-center">ENTROPY</h1>
           
           <div className="space-y-4">
+            {/* EXPORT BUTTONS - Removed from here */ }
             <button 
               onClick={() => setCurrentTool('DITHER')}
               className="w-full bg-white text-black text-lg md:text-xl font-bold py-3 md:py-4 hover:bg-[#f27200] hover:text-white border-2 border-black uppercase tracking-wider"
@@ -254,7 +244,7 @@ export function LabOverlay() {
       />
 
       {/* HEADER - BLACK */}
-      <div className="h-14 md:h-16 bg-black border-b-2 border-[#f27200] flex items-center px-4 md:px-6">
+      <div className="h-14 md:h-16 bg-black border-b-2 border-[#f27200] flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4 md:gap-6">
           <button
             onClick={() => setCurrentTool('MENU')}
@@ -266,6 +256,52 @@ export function LabOverlay() {
           <div className="text-[#f27200] text-2xl md:text-3xl font-bold uppercase tracking-widest">
             {currentTool}
           </div>
+        </div>
+        
+        <div className="flex gap-4">
+          {/* EXPORT BUTTONS */}
+          {currentTool === 'TERMINAL' ? (
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  setExportFormat('PNG')
+                  setIsExporting(true)
+                }}
+                disabled={isExporting}
+                className="bg-[#f27200] text-black px-2 py-1 text-[10px] md:text-xs font-bold hover:bg-white hover:text-black disabled:opacity-50 uppercase"
+              >
+                PNG
+              </button>
+              <button 
+                onClick={() => {
+                  setExportFormat('PNG_TRANSPARENT')
+                  setIsExporting(true)
+                }}
+                disabled={isExporting}
+                className="bg-[#f27200] text-black px-2 py-1 text-[10px] md:text-xs font-bold hover:bg-white hover:text-black disabled:opacity-50 uppercase"
+              >
+                PNG (ALPHA)
+              </button>
+              <button 
+                onClick={() => {
+                  setExportFormat('SVG')
+                  setIsExporting(true)
+                }}
+                disabled={isExporting}
+                className="bg-[#f27200] text-black px-2 py-1 text-[10px] md:text-xs font-bold hover:bg-white hover:text-black disabled:opacity-50 uppercase"
+              >
+                SVG
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setIsExporting(true)}
+              disabled={isExporting}
+              className="bg-[#f27200] text-black px-4 py-1 text-sm font-bold hover:bg-white hover:text-black disabled:opacity-50 uppercase"
+            >
+              {isExporting ? 'SAVING...' : 'EXPORT'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -314,7 +350,8 @@ export function LabOverlay() {
         `}>
           <div className="p-4 space-y-4">
             
-            {/* COLOR */}
+            {/* COLOR - Hide in Terminal mode */}
+            {currentTool !== 'TERMINAL' && (
             <div className="border-2 border-[#f27200] p-3 bg-black text-white">
               <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-[#f27200] pb-2">
                 COLOR
@@ -344,21 +381,24 @@ export function LabOverlay() {
                           setTintHue(20)
                         }}
                         className="text-[10px] font-bold uppercase text-[#f27200] hover:text-white"
+                        style={{ opacity: tintHue === 20 ? 0 : 1, pointerEvents: tintHue === 20 ? 'none' : 'auto' }}
                       >
                         RESET
                       </button>
-                      <div className="w-10 h-5 border-2 border-[#f27200]" style={{ backgroundColor: hueToRGB(tintHue) }} />
+                      <span className="text-[#f27200] font-semibold text-sm w-8 text-right">{tintHue}</span>
                     </div>
                   </div>
                   <input
                     type="range"
-                    min="0"
-                    max="360"
+                    min={0}
+                    max={360}
+                    step={1}
                     value={tintHue}
                     onPointerDown={pushToHistory}
-                    onChange={(e) => setTintHue(parseFloat(e.target.value))}
-                    className="w-full h-6 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
+                    onChange={(e) => setTintHue(parseInt(e.target.value))}
+                    className="w-full h-5 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />
+                  <div className="w-full h-2 mt-2 rounded-sm" style={{ backgroundColor: `hsl(${tintHue}, 100%, 50%)` }} />
                 </div>
               )}
 
@@ -418,6 +458,7 @@ export function LabOverlay() {
                 </div>
               )}
             </div>
+            )}
 
             {/* ADJUST - Hide in Datamosh and Terminal mode */}
             {currentTool !== 'DATAMOSH' && currentTool !== 'TERMINAL' && (
@@ -586,7 +627,7 @@ export function LabOverlay() {
                 {/* Character Size Slider (Inverted Density) */}
                 <div className="mb-3">
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium uppercase text-xs">CHAR SIZE</span>
+                    <span className="font-medium uppercase text-xs">CHARACTER SIZE</span>
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => {
@@ -600,26 +641,25 @@ export function LabOverlay() {
                       </button>
                       {/* Display a "Size" value instead of raw density */}
                       <span className="text-[#f27200] font-semibold text-sm w-8 text-right">
-                        {Math.round((2500 - asciiDensity) / 25)}%
+                        {Math.round((1500 - asciiDensity) / 15)}%
                       </span>
                     </div>
                   </div>
                   <input
                     type="range"
                     min={10}
-                    max={2500}
+                    max={1500} // Limit max density (min size)
                     step={10}
-                    // Invert value for slider: Low Density (10) = Big Size (Right side of slider?)
-                    // User wants "Size" slider.
-                    // Left = Small Size (High Density 2500)
+                    // Invert value for slider: Low Density (10) = Big Size
+                    // Left = Small Size (High Density 1500)
                     // Right = Big Size (Low Density 10)
-                    // So slider value = 2510 - density
-                    value={2510 - asciiDensity}
+                    // So slider value = 1510 - density
+                    value={1510 - asciiDensity}
                     onPointerDown={pushToHistory}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value)
-                      // Invert back: density = 2510 - val
-                      setAsciiDensity(2510 - val)
+                      // Invert back: density = 1510 - val
+                      setAsciiDensity(1510 - val)
                     }}
                     className="w-full h-5 appearance-none bg-[#333] border-2 border-[#333] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#f27200] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
                   />

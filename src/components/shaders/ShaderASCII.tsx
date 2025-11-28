@@ -17,6 +17,7 @@ uniform sampler2D uTexture;
 uniform sampler2D uCharTexture;
 uniform float uDensity;
 uniform vec3 uColor;
+uniform float uTransparent; // 0.0 = Opaque Black, 1.0 = Transparent
 uniform vec2 uResolution;
 varying vec2 vUv;
 
@@ -24,25 +25,18 @@ void main() {
   vec2 uv = vUv;
   
   // 1. Pixelate / Grid Logic
-  // Calculate grid cell size
   vec2 grid = vec2(uDensity, uDensity * (uResolution.y / uResolution.x));
   vec2 cellUv = fract(uv * grid);
   vec2 gridUv = floor(uv * grid) / grid;
   
-  // 2. Sample Input Luminance at grid center
-  // We add 0.5/grid to sample the center of the block
+  // 2. Sample Input Luminance
   vec3 inputColor = texture2D(uTexture, gridUv + (0.5 / grid)).rgb;
   float gray = dot(inputColor, vec3(0.299, 0.587, 0.114));
   
   // 3. Map Luminance to Character
-  // We have 10 characters in the strip: " .:-=+*#%@"
-  // Map gray (0.0-1.0) to index (0.0-9.0)
-  float charIndex = floor(gray * 9.99); // 0 to 9
+  float charIndex = floor(gray * 9.99);
   
   // 4. Calculate Character Texture UVs
-  // The texture is a horizontal strip of 10 characters.
-  // Each char is 0.1 width.
-  // cellUv.x needs to be squashed to 0.1 and offset by charIndex * 0.1
   float charWidth = 1.0 / 10.0;
   vec2 charUv = vec2(
     (cellUv.x * charWidth) + (charIndex * charWidth),
@@ -53,14 +47,16 @@ void main() {
   vec4 charColor = texture2D(uCharTexture, charUv);
   
   // 6. Output
-  // Multiply character alpha/white by the chosen terminal color
-  // We assume the char texture is white text on transparent/black background
-  // If procedural texture is black text on white, we might need to invert.
-  // Let's assume we draw white text on black canvas.
+  // If transparent: Alpha = charColor.r (assuming white text on black/transparent)
+  // If opaque: Mix black background with colored text
   
-  vec3 finalColor = uColor * charColor.r; // Use red channel as mask
+  vec3 finalColor = uColor * charColor.r;
   
-  gl_FragColor = vec4(finalColor, 1.0);
+  if (uTransparent > 0.5) {
+     gl_FragColor = vec4(uColor, charColor.r);
+  } else {
+     gl_FragColor = vec4(finalColor, 1.0);
+  }
 }
 `
 
@@ -74,6 +70,7 @@ export function ShaderASCII() {
   const imageURL = useStore((state) => state.imageURL)
   const asciiDensity = useStore((state) => state.asciiDensity)
   const asciiColor = useStore((state) => state.asciiColor)
+  const exportFormat = useStore((state) => state.exportFormat)
   
   const [texture, setTexture] = useState<THREE.Texture | null>(null)
   const [charTexture, setCharTexture] = useState<THREE.Texture | null>(null)
@@ -136,6 +133,7 @@ export function ShaderASCII() {
     uCharTexture: { value: null },
     uDensity: { value: 120 },
     uColor: { value: new THREE.Color(0x00ff00) },
+    uTransparent: { value: 0.0 },
     uResolution: { value: new THREE.Vector2(1, 1) }
   }), [])
 
@@ -146,6 +144,8 @@ export function ShaderASCII() {
       materialRef.current.uniforms.uCharTexture.value = charTexture
       materialRef.current.uniforms.uDensity.value = asciiDensity
       materialRef.current.uniforms.uColor.value.set(asciiColor)
+      // If exporting as PNG_TRANSPARENT, set uTransparent to 1.0
+      materialRef.current.uniforms.uTransparent.value = exportFormat === 'PNG_TRANSPARENT' ? 1.0 : 0.0
       materialRef.current.uniforms.uResolution.value.set(size.width, size.height)
     }
   })

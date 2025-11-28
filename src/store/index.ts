@@ -38,6 +38,7 @@ interface AppState {
   asciiColor: string
   
   isExporting: boolean
+  exportFormat: 'PNG' | 'PNG_TRANSPARENT' | 'SVG'
   isFullscreen: boolean
   
   setCurrentTool: (tool: Tool) => void
@@ -68,6 +69,7 @@ interface AppState {
   setAsciiColor: (color: string) => void
   
   setIsExporting: (isExporting: boolean) => void
+  setExportFormat: (format: 'PNG' | 'PNG_TRANSPARENT' | 'SVG') => void
   setIsFullscreen: (isFullscreen: boolean) => void
   // History
   past: AppState[],
@@ -137,6 +139,7 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   asciiColor: '#00ff00', // Default Green
   
   isExporting: false,
+  exportFormat: 'PNG',
   isFullscreen: false,
   
   past: [],
@@ -206,10 +209,11 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   setDmSeed: (seed) => set({ dm_seed: seed }),
   setDmSizeVariation: (variation) => set({ dm_size_variation: variation }),
   
-  setAsciiDensity: (density) => set({ asciiDensity: density }),
-  setAsciiColor: (color) => set({ asciiColor: color }),
+  setAsciiDensity: (asciiDensity) => set({ asciiDensity }),
+  setAsciiColor: (asciiColor) => set({ asciiColor }),
   
   setIsExporting: (isExporting) => set({ isExporting }),
+  setExportFormat: (exportFormat) => set({ exportFormat }),
   setIsFullscreen: (isFullscreen) => set({ isFullscreen }),
 }), {
   name: 'entropy-storage',
