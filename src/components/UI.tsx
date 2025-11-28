@@ -91,6 +91,10 @@ export function LabOverlay() {
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
   
+  const dm_strength = useStore((state) => state.dm_strength)
+  const dm_scale = useStore((state) => state.dm_scale)
+  const dm_contrast = useStore((state) => state.dm_contrast)
+
   const setDitherStrength = useStore((state) => state.setDitherStrength)
   const setDitherScale = useStore((state) => state.setDitherScale)
   const setDitherAlgorithm = useStore((state) => state.setDitherAlgorithm)
@@ -106,6 +110,10 @@ export function LabOverlay() {
   const setColorMode = useStore((state) => state.setColorMode)
   const setTintHue = useStore((state) => state.setTintHue)
   const setPaletteColors = useStore((state) => state.setPaletteColors)
+  const setDmStrength = useStore((state) => state.setDmStrength)
+  const setDmScale = useStore((state) => state.setDmScale)
+  const setDmContrast = useStore((state) => state.setDmContrast)
+  
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
   const setIsFullscreen = useStore((state) => state.setIsFullscreen)
@@ -200,10 +208,10 @@ export function LabOverlay() {
             </button>
             
             <button 
-              disabled
-              className="w-full bg-black text-white/30 text-lg md:text-xl font-bold py-3 md:py-4 border-2 border-white/30 cursor-not-allowed uppercase tracking-wider"
+              onClick={() => setCurrentTool('DATAMOSH')}
+              className="w-full bg-white text-black text-lg md:text-xl font-bold py-3 md:py-4 hover:bg-[#f27200] hover:text-white border-2 border-black uppercase tracking-wider"
             >
-              DATAMOSH [COMING SOON]
+              DATAMOSH
             </button>
           </div>
           
@@ -237,7 +245,7 @@ export function LabOverlay() {
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
           <div className="text-[#f27200] text-2xl md:text-3xl font-bold uppercase tracking-widest">
-            ENTROPY
+            {currentTool === 'DATAMOSH' ? 'DATAMOSH' : 'ENTROPY'}
           </div>
         </div>
       </div>
@@ -440,7 +448,52 @@ export function LabOverlay() {
               ))}
             </div>
 
-            {/* DITHER */}
+            {/* DATAMOSH CONTROLS */}
+            {currentTool === 'DATAMOSH' && (
+              <div className="border-2 border-[#f27200] p-3 bg-[#f27200] text-black mt-4">
+                <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-black pb-2">
+                  DATAMOSH
+                </div>
+                
+                {[
+                  { label: 'STRENGTH', value: dm_strength, setter: setDmStrength, min: 0, max: 1, step: 0.01, def: 0.5 },
+                  { label: 'SCALE', value: dm_scale, setter: setDmScale, min: 0.1, max: 2, step: 0.1, def: 1.0 },
+                  { label: 'CONTRAST', value: dm_contrast, setter: setDmContrast, min: 0.1, max: 5, step: 0.1, def: 1.0 },
+                ].map(({ label, value, setter, min, max, step, def }) => (
+                  <div key={label} className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <span className="font-medium uppercase text-xs">{label}</span>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            pushToHistory()
+                            setter(def)
+                          }}
+                          className="text-[10px] font-bold uppercase text-black hover:text-white"
+                          style={{ opacity: value === def ? 0 : 1, pointerEvents: value === def ? 'none' : 'auto' }}
+                        >
+                          RESET
+                        </button>
+                        <span className="font-semibold text-sm w-8 text-right">{value.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <input
+                      type="range"
+                      min={min}
+                      max={max}
+                      step={step}
+                      value={value}
+                      onPointerDown={pushToHistory}
+                      onChange={(e) => setter(parseFloat(e.target.value))}
+                      className="w-full h-6 appearance-none bg-black border-4 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-black"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* DITHER CONTROLS - Only show if DITHER tool is active */}
+            {currentTool === 'DITHER' && (
             <div className="border-2 border-[#f27200] p-3 bg-[#f27200] text-black">
               <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-black pb-2">
                 DITHER
@@ -517,6 +570,7 @@ export function LabOverlay() {
                 />
               </div>
             </div>
+            )}
 
           </div>
         </div>

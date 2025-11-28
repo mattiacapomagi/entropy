@@ -262,9 +262,65 @@ void main() {
 }
 `
 
+const datamoshFragmentShader = `
+uniform sampler2D uTexture;
+uniform float uDmStrength;
+uniform float uDmScale;
+uniform float uDmContrast;
+varying vec2 vUv;
+
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+float noise(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+void main() {
+  vec2 uv = vUv;
+  
+  // Create block grid
+  float blocks = 20.0 * uDmScale;
+  vec2 blockUv = floor(uv * blocks) / blocks;
+  
+  // Generate noise for displacement
+  float n = noise(blockUv * 5.0 + uDmContrast);
+  
+  // Contrast curve for noise
+  n = pow(n, uDmContrast);
+  
+  // Calculate displacement vector
+  vec2 displacement = vec2(
+    (random(blockUv) - 0.5) * 2.0,
+    (random(blockUv + 100.0) - 0.5) * 2.0
+  );
+  
+  // Apply displacement
+  vec2 displacedUv = uv + displacement * uDmStrength * n * 0.1;
+  
+  // Sample texture with displaced UVs
+  vec4 color = texture2D(uTexture, displacedUv);
+  
+  // Add some digital artifacts/noise
+  float artifact = random(uv * 100.0) * uDmStrength * 0.1;
+  color.rgb += artifact;
+  
+  gl_FragColor = color;
+}
+`
+
 const ScreenQuad = memo(function ScreenQuad() {
   const { gl, scene, camera, size } = useThree()
   const imageURL = useStore((state) => state.imageURL)
+  const currentTool = useStore((state) => state.currentTool)
   const ditherStrength = useStore((state) => state.ditherStrength)
   const ditherScale = useStore((state) => state.ditherScale)
   const ditherAlgorithm = useStore((state) => state.ditherAlgorithm)
@@ -280,6 +336,10 @@ const ScreenQuad = memo(function ScreenQuad() {
   const colorMode = useStore((state) => state.colorMode)
   const tintHue = useStore((state) => state.tintHue)
   const paletteColors = useStore((state) => state.paletteColors)
+  
+  const dm_strength = useStore((state) => state.dm_strength)
+  const dm_scale = useStore((state) => state.dm_scale)
+  const dm_contrast = useStore((state) => state.dm_contrast)
   const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   
@@ -358,6 +418,11 @@ const ScreenQuad = memo(function ScreenQuad() {
     uColorMode: { value: 0 },
     uTintHue: { value: 20.0 },
     uPalette: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] },
+    
+    // Datamosh Uniforms
+    uDmStrength: { value: 0.0 },
+    uDmScale: { value: 1.0 },
+    uDmContrast: { value: 1.0 },
     uImageResolution: { value: new THREE.Vector2(1, 1) },
     uHasImage: { value: false },
     uTime: { value: 0 }
@@ -397,6 +462,10 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uColorMode.value = colorMode
       materialRef.current.uniforms.uTintHue.value = tintHue
       materialRef.current.uniforms.uPalette.value = paletteUniform
+      
+      materialRef.current.uniforms.uDmStrength.value = dm_strength
+      materialRef.current.uniforms.uDmScale.value = dm_scale
+      materialRef.current.uniforms.uDmContrast.value = dm_contrast
     }
 
     if (isExporting && texture && texture.image && exportCameraRef.current) {
@@ -485,7 +554,7 @@ const ScreenQuad = memo(function ScreenQuad() {
         <shaderMaterial
           ref={materialRef}
           vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
+          fragmentShader={currentTool === 'DATAMOSH' ? datamoshFragmentShader : fragmentShader}
           uniforms={uniforms}
         />
       </mesh>

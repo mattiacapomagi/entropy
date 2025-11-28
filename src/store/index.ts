@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-type Tool = 'MENU' | 'DITHER'
+type Tool = 'MENU' | 'DITHER' | 'DATAMOSH'
 
 interface AppState {
   currentTool: Tool
@@ -25,6 +25,11 @@ interface AppState {
   tintHue: number
   paletteColors: string[]
   
+  // Datamosh Tool Parameters
+  dm_strength: number
+  dm_scale: number
+  dm_contrast: number
+  
   isExporting: boolean
   isFullscreen: boolean
   
@@ -45,6 +50,9 @@ interface AppState {
   setColorMode: (mode: number) => void
   setTintHue: (hue: number) => void
   setPaletteColors: (colors: string[]) => void
+  setDmStrength: (strength: number) => void
+  setDmScale: (scale: number) => void
+  setDmContrast: (contrast: number) => void
   setIsExporting: (isExporting: boolean) => void
   setIsFullscreen: (isFullscreen: boolean) => void
   // History
@@ -73,6 +81,9 @@ const getHistoryState = (state: AppState): Partial<AppState> => ({
   colorMode: state.colorMode,
   tintHue: state.tintHue,
   paletteColors: [...state.paletteColors],
+  dm_strength: state.dm_strength,
+  dm_scale: state.dm_scale,
+  dm_contrast: state.dm_contrast,
 })
 
 export const useStore = create<AppState>()(persist((set, get) => ({
@@ -95,6 +106,10 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   colorMode: 0,
   tintHue: 20.0,
   paletteColors: ['#0d080d', '#4f2b24', '#825b31', '#c59154'],
+  
+  dm_strength: 0.5,
+  dm_scale: 1.0,
+  dm_contrast: 1.0,
   
   isExporting: false,
   isFullscreen: false,
@@ -159,6 +174,9 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   setColorMode: (mode) => set({ colorMode: mode }),
   setTintHue: (hue) => set({ tintHue: hue }),
   setPaletteColors: (colors) => set({ paletteColors: colors }),
+  setDmStrength: (strength) => set({ dm_strength: strength }),
+  setDmScale: (scale) => set({ dm_scale: scale }),
+  setDmContrast: (contrast) => set({ dm_contrast: contrast }),
   
   setIsExporting: (isExporting) => set({ isExporting }),
   setIsFullscreen: (isFullscreen) => set({ isFullscreen }),
@@ -181,5 +199,8 @@ export const useStore = create<AppState>()(persist((set, get) => ({
     colorMode: state.colorMode,
     tintHue: state.tintHue,
     paletteColors: state.paletteColors,
+    dm_strength: state.dm_strength,
+    dm_scale: state.dm_scale,
+    dm_contrast: state.dm_contrast,
   })
 }))
