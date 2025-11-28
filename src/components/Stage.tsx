@@ -274,7 +274,7 @@ uniform float uDmSizeVariation;
 uniform vec3 uPalette[4];
 uniform bool uUsePalette;
 // Color Mode Uniforms
-uniform int uColorMode; // 0=Normal, 1=Grayscale, 2=Palette (Multicolor), 3=Tint
+uniform int uColorMode; // 0=Normal, 1=Grayscale, 2=Tint, 3=Palette (Multicolor)
 uniform float uTintHue;
 varying vec2 vUv;
 
@@ -392,20 +392,19 @@ void main() {
     color.rgb = vec3(gray);
   }
   // 2. Palette (Multicolor) - Handled via uUsePalette flag logic or explicit mode
+  // 2. Tint
   else if (uColorMode == 2) {
-    // Map to nearest palette color
-    // We can also do dithering here if we wanted, but for now just nearest neighbor
-    color.rgb = mapToPalette(color.rgb);
-  }
-  // 3. Tint
-  else if (uColorMode == 3) {
     float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
     vec3 tintColor = hueToRGB(uTintHue);
     color.rgb = tintColor * gray;
   }
+  // 3. Palette (Multicolor)
+  else if (uColorMode == 3) {
+    color.rgb = mapToPalette(color.rgb);
+  }
   
-  // Fallback for uUsePalette if not in mode 2 (legacy support or mixed usage)
-  if (uUsePalette && uColorMode != 2) {
+  // Fallback for uUsePalette if not in mode 3 (legacy support or mixed usage)
+  if (uUsePalette && uColorMode != 3) {
      color.rgb = mapToPalette(color.rgb);
   }
   
@@ -563,9 +562,9 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uWhites.value = (whites - 100) / 100.0
       
       materialRef.current.uniforms.uColorMode.value = colorMode
-      materialRef.current.uniforms.uTintHue.value = tintHue
+      materialRef.current.uniforms.uTintHue.value = tintHue / 360.0 // Normalize 0-360 to 0-1 for shader
       materialRef.current.uniforms.uPalette.value = paletteUniform
-      materialRef.current.uniforms.uUsePalette.value = colorMode === 2 // 2 is PALETTE mode
+      materialRef.current.uniforms.uUsePalette.value = colorMode === 3 // 3 is MULTICOLOR/PALETTE mode
       
       materialRef.current.uniforms.uDmStrength.value = dm_strength
       materialRef.current.uniforms.uDmScale.value = dm_scale
