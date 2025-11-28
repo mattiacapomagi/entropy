@@ -236,7 +236,7 @@ export function LabOverlay() {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
-          <div className="text-[#f27200] text-lg md:text-xl font-bold uppercase tracking-widest">
+          <div className="text-[#f27200] text-2xl md:text-3xl font-bold uppercase tracking-widest">
             ENTROPY
           </div>
         </div>
