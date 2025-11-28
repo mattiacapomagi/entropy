@@ -4221,6 +4221,7 @@ void main() {
 uniform sampler2D uTexture;
 uniform float uDmStrength;
 uniform float uDmScale;
+uniform float uDmContrast;
 uniform float uDmColorNoise;
 varying vec2 vUv;
 
