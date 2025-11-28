@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# Entropy
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Entropy** is a high-performance, browser-based image processing tool focused on advanced dithering and color grading. It leverages WebGL for real-time rendering, allowing users to apply complex dithering algorithms and color manipulations instantly, even on high-resolution images.
 
-Currently, two official plugins are available:
+## 🛠 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Core:** [React](https://react.dev/) (v18), [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **Rendering:** [Three.js](https://threejs.org/) via [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber)
+- **State Management:** [Zustand](https://github.com/pmndrs/zustand) (with Persistence & History middleware)
+- **Styling:** Tailwind CSS (via utility classes)
 
-## React Compiler
+## 🏗 Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The application is built around a single WebGL canvas (`Stage`) and a floating UI layer (`UI`).
 
-## Expanding the ESLint configuration
+### 1. State Management (`src/store/index.ts`)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The application state is centralized in a Zustand store, which handles:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Image Data:** URL, dimensions.
+- **Processing Parameters:** Dither strength, scale, algorithm, color adjustments.
+- **History:** Custom Undo/Redo implementation using `past` and `future` arrays.
+- **Persistence:** `persist` middleware saves tool state and settings to `localStorage`, excluding transient data like the loaded image.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 2. Rendering Pipeline (`src/components/Stage.tsx`)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Rendering is performed using a single full-screen quad (`ScreenQuad`) with a custom `ShaderMaterial`.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Vertex Shader:** Standard pass-through.
+- **Fragment Shader:** The core processing engine.
+  1.  **Color Grading:**
+      - **Brightness/Contrast:** Standard linear adjustments.
+      - **Shadows/Highlights:** Luma-based masking to target specific tonal ranges.
+      - **Levels (Blacks/Whites):** Input/Output level remapping.
+      - **Gamma/Saturation:** Power functions and vector mixing.
+      - **Vibrance:** Saturation adjustment weighted by current saturation (prevents clipping).
+  2.  **Dithering:**
+      - **Bayer Matrices:** 2x2, 4x4, 8x8 ordered dithering.
+      - **Halftone:** Rotated grid patterns (45°, 22°).
+      - **Noise:** White noise dithering.
+  3.  **Palette Mapping:**
+      - Maps each pixel to the nearest color in the active palette using Euclidean distance.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 3. Optimization
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **React.memo:** The `ScreenQuad` is memoized to prevent re-renders unless uniforms change.
+- **Texture Filtering:** Uses `LinearFilter` for smooth preview scaling on mobile/desktop.
+- **Debouncing:** Slider inputs trigger state updates; history is pushed only on interaction start (`onPointerDown`) to group continuous changes.
+
+## 🚀 Features
+
+- **Real-time WebGL Preview:** Zero-latency feedback.
+- **Advanced Color Control:**
+  - **Shadows/Lights:** Recover detail in dynamic ranges.
+  - **Blacks/Whites:** Set precise black/white points.
+  - **Vibrance:** Smart saturation.
+- **Dithering Algorithms:**
+  - Bayer (2x2, 4x4, 8x8)
+  - Halftone (45°, 22°)
+  - Noise
+- **Palette System:** Custom 4-color palettes + Presets.
+- **State Persistence:** Reloading the page retains your settings and tool position.
+- **History:** Robust Undo/Redo system for all parameters.
+
+## 📦 Development
+
+1.  **Install Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+2.  **Run Development Server:**
+
+    ```bash
+    npm run dev
+    ```
+
+3.  **Build for Production:**
+    ```bash
+    npm run build
+    ```
