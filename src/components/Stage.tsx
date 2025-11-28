@@ -680,7 +680,6 @@ const ScreenQuad = memo(function ScreenQuad() {
       <OrthographicCamera 
         makeDefault 
         position={[0, 0, 10]} 
-        zoom={1}
         near={0.1}
         far={1000}
       />

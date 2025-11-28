@@ -337,8 +337,8 @@ export function ShaderASCII() {
        lastFittedTextureRef.current = texture.uuid
        
        const img = texture.image as HTMLImageElement
-       // Use smaller padding to ensure full visibility (0.8 instead of 0.9)
-       const padding = 0.8
+       // Use 0.95 padding to fit perfectly with small margin
+       const padding = 0.95
        const zoomWidth = (size.width * padding) / img.width
        const zoomHeight = (size.height * padding) / img.height
        const newZoom = Math.min(zoomWidth, zoomHeight)
@@ -349,7 +349,8 @@ export function ShaderASCII() {
        orthoCam.updateProjectionMatrix()
        
        if (controlsRef.current) {
-         controlsRef.current.minZoom = newZoom * 0.5 // Allow zooming out more
+         // Allow zooming out significantly to see the whole canvas if needed
+         controlsRef.current.minZoom = Math.min(newZoom * 0.5, 0.1)
          controlsRef.current.reset()
          controlsRef.current.object.zoom = newZoom
          controlsRef.current.object.updateProjectionMatrix()
