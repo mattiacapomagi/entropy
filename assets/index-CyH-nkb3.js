@@ -3981,12 +3981,11 @@ varying vec2 vUv;
 void main() {
   vec2 uv = vUv;
   
-  // 1. Pixelate / Grid Logic with SQUARE cells
-  // uDensity defines the number of columns
-  // Calculate rows to maintain square aspect ratio for cells
-  float aspect = uResolution.y / uResolution.x;
+  // 1. Create TRULY SQUARE cells (in pixel space)
+  // uDensity = number of columns
   float cols = uDensity;
-  float rows = uDensity * aspect;
+  float cellSizeX = uResolution.x / cols; // width of one cell in pixels
+  float rows = uResolution.y / cellSizeX;  // how many cells fit vertically (maintains square cells)
   
   vec2 grid = vec2(cols, rows);
   vec2 cellUv = fract(uv * grid);
