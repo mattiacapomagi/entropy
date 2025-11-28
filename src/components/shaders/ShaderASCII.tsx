@@ -76,6 +76,8 @@ export function ShaderASCII() {
   const imageURL = useStore((state) => state.imageURL)
   const asciiDensity = useStore((state) => state.asciiDensity)
   const asciiColor = useStore((state) => state.asciiColor)
+  const isExporting = useStore((state) => state.isExporting)
+  const setIsExporting = useStore((state) => state.setIsExporting)
   
   const [texture, setTexture] = useState<THREE.Texture | null>(null)
   const [charTexture, setCharTexture] = useState<THREE.Texture | null>(null)
@@ -142,8 +144,8 @@ export function ShaderASCII() {
     uResolution: { value: new THREE.Vector2(1, 1) }
   }), [])
 
-  // 4. Update Loop
-  useFrame(() => {
+  // 4. Update Loop + Export Logic
+  useFrame(({ gl, scene, camera: frameCamera }) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTexture.value = texture
       materialRef.current.uniforms.uCharTexture.value = charTexture
@@ -152,6 +154,61 @@ export function ShaderASCII() {
       // Always use transparency for Terminal (export will always be transparent PNG)
       materialRef.current.uniforms.uTransparent.value = 1.0
       materialRef.current.uniforms.uResolution.value.set(size.width, size.height)
+    }
+    
+    // EXPORT LOGIC
+    if (isExporting && texture && texture.image) {
+      console.log('[SHADER_ASCII] Export triggered!')
+      console.log('[SHADER_ASCII] texture:', texture)
+      console.log('[SHADER_ASCII] texture.image:', texture.image)
+      
+      const img = texture.image as HTMLImageElement
+      const originalWidth = img.width
+      const originalHeight = img.height
+      
+      console.log('[SHADER_ASCII] Image dimensions:', { originalWidth, originalHeight })
+      
+      // Temporarily resize canvas to original image size
+      const currentWidth = size.width
+      const currentHeight = size.height
+      gl.setSize(originalWidth, originalHeight, false)
+      
+      // Render at original size
+      gl.render(scene, frameCamera)
+      
+      try {
+        console.log('[SHADER_ASCII] Creating PNG blob...')
+        gl.domElement.toBlob((blob) => {
+          if (!blob) {
+            console.error('[SHADER_ASCII] Failed to create blob')
+            return
+         }
+          
+          console.log('[SHADER_ASCII] Blob created, size:', blob.size)
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          
+          const now = new Date()
+          const timestamp = now.getTime().toString().slice(-6)
+          
+          link.download = `entropy_terminal_${timestamp}.png`
+          link.href = url
+          document.body.appendChild(link)
+          console.log('[SHADER_ASCII] Triggering download...')
+          link.click()
+          document.body.removeChild(link)
+          
+          setTimeout(() => URL.revokeObjectURL(url), 100)
+          console.log('[SHADER_ASCII] Download complete')
+        }, 'image/png', 1.0)
+      } catch (error) {
+        console.error('[SHADER_ASCII] Export failed:', error)
+      }
+      
+      // Restore canvas size
+      gl.setSize(currentWidth, currentHeight, false)
+      setIsExporting(false)
+      console.log('[SHADER_ASCII] Export process finished')
     }
   })
   
