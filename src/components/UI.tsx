@@ -95,6 +95,7 @@ export function LabOverlay() {
   const dm_scale = useStore((state) => state.dm_scale)
   const dm_contrast = useStore((state) => state.dm_contrast)
   const dm_color_noise = useStore((state) => state.dm_color_noise)
+  const dm_edge_blur = useStore((state) => state.dm_edge_blur)
 
   const setDitherStrength = useStore((state) => state.setDitherStrength)
   const setDitherScale = useStore((state) => state.setDitherScale)
@@ -115,6 +116,7 @@ export function LabOverlay() {
   const setDmScale = useStore((state) => state.setDmScale)
   const setDmContrast = useStore((state) => state.setDmContrast)
   const setDmColorNoise = useStore((state) => state.setDmColorNoise)
+  const setDmEdgeBlur = useStore((state) => state.setDmEdgeBlur)
   
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
@@ -461,8 +463,9 @@ export function LabOverlay() {
                 
                 {[
                   { label: 'STRENGTH', value: dm_strength, setter: setDmStrength, min: 0, max: 1, step: 0.01, def: 0.5 },
-                  { label: 'BLOCK SIZE', value: dm_scale, setter: setDmScale, min: 0.1, max: 2, step: 0.1, def: 1.0 },
-                  { label: 'CONTRAST', value: dm_contrast, setter: setDmContrast, min: 0.1, max: 5, step: 0.1, def: 1.0 },
+                  { label: 'BLOCK SIZE', value: dm_scale, setter: setDmScale, min: 0.01, max: 5, step: 0.01, def: 1.0 },
+                  { label: 'CONTRAST', value: dm_contrast, setter: setDmContrast, min: 1.0, max: 20.0, step: 0.1, def: 1.0 },
+                  { label: 'EDGE BLUR', value: dm_edge_blur, setter: setDmEdgeBlur, min: 0, max: 1, step: 0.01, def: 0.0 },
                   { label: 'COLOR SHIFT', value: dm_color_noise, setter: setDmColorNoise, min: 0, max: 1, step: 0.01, def: 0.0 },
                 ].map(({ label, value, setter, min, max, step, def }) => (
                   <div key={label} className="mb-3">

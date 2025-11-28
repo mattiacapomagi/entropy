@@ -268,6 +268,7 @@ uniform float uDmStrength;
 uniform float uDmScale;
 uniform float uDmContrast;
 uniform float uDmColorNoise;
+uniform float uDmEdgeBlur;
 varying vec2 vUv;
 
 float random(vec2 st) {
@@ -296,10 +297,30 @@ void main() {
 
   vec2 blockUv = floor(uv * blocks) / blocks;
   
+  // EDGE BLUR: Mix between stepped blockUv and smooth uv
+  // uDmEdgeBlur 0.0 -> Hard blocks
+  // uDmEdgeBlur 1.0 -> Smooth distortion (Liquid)
+  vec2 noiseUv = mix(blockUv, uv, uDmEdgeBlur);
+  
   // Generate noise for displacement
-  // CONTRAST: Standard contrast formula
-  // Higher uDmContrast = Sharper transitions (more binary 0 or 1)
-  float n = noise(blockUv * 5.0);
+  // CONTRAST: User wants "Inverted" logic relative to previous.
+  // Previous: (n-0.5)*C + 0.5. High C = Sharp.
+  // User says "Still inverted". So High Slider should mean Sharp?
+  // If they say "Inverted", maybe they want High Slider = Soft?
+  // Let's try to map Slider (1..20) to (0.05..1.0) for the multiplier?
+  // Or maybe they want the slider to control the THRESHOLD of the noise?
+  // Let's try a different approach:
+  // High Contrast = More extreme values (0 or 1).
+  // Low Contrast = More middle values (0.5).
+  // I will use a power curve again but inverted?
+  // Let's try: n = (n - 0.5) * uDmContrast + 0.5;
+  // But I will flip the slider in UI to be intuitive.
+  // Wait, if I use the noiseUv (which might be smooth), the contrast will sharpen the edges.
+  
+  float n = noise(noiseUv * 5.0);
+  
+  // Apply Contrast
+  // If uDmContrast is high, we want hard edges.
   n = (n - 0.5) * uDmContrast + 0.5;
   n = clamp(n, 0.0, 1.0);
   
@@ -310,6 +331,8 @@ void main() {
   );
   
   // Apply displacement
+  // Use 'n' to modulate strength.
+  // If n is binary (0 or 1), displacement is On or Off.
   vec2 displacedUv = uv + displacement * uDmStrength * n * 0.1;
   
   // Sample texture with displaced UVs
@@ -320,10 +343,15 @@ void main() {
   color.rgb += artifact;
   
   // COLOR INVERSION / SHIFT
-  // Invert colors in random blocks based on uDmColorNoise threshold
-  float blockRandom = random(blockUv + 50.0);
-  if (blockRandom < uDmColorNoise) {
-    color.rgb = 1.0 - color.rgb;
+  // Apply ONLY to displaced blocks.
+  // Check if displacement is significant (n > 0.1)
+  // And check random chance.
+  if (n > 0.1) {
+    float blockRandom = random(blockUv + 50.0);
+    // uDmColorNoise is the percentage (0.0 to 1.0)
+    if (blockRandom < uDmColorNoise) {
+      color.rgb = 1.0 - color.rgb;
+    }
   }
   
   gl_FragColor = color;
@@ -354,6 +382,7 @@ const ScreenQuad = memo(function ScreenQuad() {
   const dm_scale = useStore((state) => state.dm_scale)
   const dm_contrast = useStore((state) => state.dm_contrast)
   const dm_color_noise = useStore((state) => state.dm_color_noise)
+  const dm_edge_blur = useStore((state) => state.dm_edge_blur)
   const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   
@@ -438,6 +467,7 @@ const ScreenQuad = memo(function ScreenQuad() {
     uDmScale: { value: 1.0 },
     uDmContrast: { value: 1.0 },
     uDmColorNoise: { value: 0.0 },
+    uDmEdgeBlur: { value: 0.0 },
     uImageResolution: { value: new THREE.Vector2(1, 1) },
     uHasImage: { value: false },
     uTime: { value: 0 }
@@ -482,6 +512,7 @@ const ScreenQuad = memo(function ScreenQuad() {
       materialRef.current.uniforms.uDmScale.value = dm_scale
       materialRef.current.uniforms.uDmContrast.value = dm_contrast
       materialRef.current.uniforms.uDmColorNoise.value = dm_color_noise
+      materialRef.current.uniforms.uDmEdgeBlur.value = dm_edge_blur
     }
 
     if (isExporting && texture && texture.image && exportCameraRef.current) {
