@@ -41,6 +41,11 @@ Rendering is performed using a single full-screen quad (`ScreenQuad`) with a cus
       - **Noise:** White noise dithering.
   3.  **Palette Mapping:**
       - Maps each pixel to the nearest color in the active palette using Euclidean distance.
+  4.  **Datamosh (Block Displacement):**
+      - Simulates video compression artifacts on static images.
+      - **Block Displacement:** Uses noise-driven vector fields to displace pixels in a grid.
+      - **Edge Blur:** Mixes stepped (blocky) and smooth (liquid) displacement for organic transitions.
+      - **Color Shift:** Inverts colors of displaced blocks based on a density mask.
 
 ### 3. Optimization
 
@@ -59,6 +64,11 @@ Rendering is performed using a single full-screen quad (`ScreenQuad`) with a cus
   - Bayer (2x2, 4x4, 8x8)
   - Halftone (45°, 22°)
   - Noise
+- **Datamosh Tool:**
+  - **Block Size:** Control the granularity of the glitch (from tiny noise to huge blocks).
+  - **Density:** Adjust the percentage of the image affected by the distortion.
+  - **Edge Blur:** Soften the edges of the blocks for a liquid/melting effect.
+  - **Color Shift:** Invert colors of displaced blocks for a "corrupted file" aesthetic.
 - **Palette System:** Custom 4-color palettes + Presets.
 - **State Persistence:** Reloading the page retains your settings and tool position.
 - **History:** Robust Undo/Redo system for all parameters.
