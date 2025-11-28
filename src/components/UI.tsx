@@ -574,14 +574,12 @@ export function LabOverlay() {
                     onChange={(e) => {
                       const hue = parseInt(e.target.value)
                       const color = `hsl(${hue}, 100%, 50%)`
-                      // Convert HSL to Hex for consistency if needed, or just use HSL string
-                      // Let's use a helper or just set HSL string which CSS/Canvas supports
-                      // But for Hex input sync, we might want hex.
-                      // For simplicity, let's use the hueToRGB helper from UI component if available or inline it.
-                      // Actually, let's just use HSL string for now, it works in Canvas/CSS.
                       setAsciiColor(color)
                     }}
-                    className="w-full h-4 appearance-none bg-gradient-to-r from-red-500 via-green-500 to-blue-500 border-2 border-[#333] mb-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
+                    className="w-full h-4 appearance-none border-2 border-[#333] mb-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
+                    style={{
+                      background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'
+                    }}
                   />
                 </div>
 

@@ -670,11 +670,12 @@ const ScreenQuad = memo(function ScreenQuad() {
            setTimeout(() => URL.revokeObjectURL(url), 100)
          }
          
-         setIsExporting(false)
-         return // Skip standard PNG export
+         // Continue to standard PNG export...
+         // setIsExporting(false) // Don't stop here
+         // return // Don't return, let it fall through to PNG export
       }
 
-      // STANDARD PNG EXPORT (Dither / Datamosh)
+      // STANDARD PNG EXPORT (Dither / Datamosh / Terminal Raster)
       // Configure export camera to match image dimensions exactly
       const cam = exportCameraRef.current
       cam.left = -originalWidth / 2
