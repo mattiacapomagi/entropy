@@ -273,7 +273,18 @@ uniform float uDmSizeVariation;
 // Palette Uniforms
 uniform vec3 uPalette[4];
 uniform bool uUsePalette;
+// Color Mode Uniforms
+uniform int uColorMode; // 0=Normal, 1=Grayscale, 2=Palette (Multicolor), 3=Tint
+uniform float uTintHue;
 varying vec2 vUv;
+
+// Helper for Tint
+vec3 hueToRGB(float hue) {
+  float r = abs(hue * 6.0 - 3.0) - 1.0;
+  float g = 2.0 - abs(hue * 6.0 - 2.0);
+  float b = 2.0 - abs(hue * 6.0 - 4.0);
+  return clamp(vec3(r, g, b), 0.0, 1.0);
+}
 
 float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898,78.233) + uDmSeed)) * 43758.5453123);
@@ -374,9 +385,28 @@ void main() {
     }
   }
   
-  // PALETTE MAPPING
-  if (uUsePalette) {
+  // COLOR MODES
+  // 1. Grayscale
+  if (uColorMode == 1) {
+    float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    color.rgb = vec3(gray);
+  }
+  // 2. Palette (Multicolor) - Handled via uUsePalette flag logic or explicit mode
+  else if (uColorMode == 2) {
+    // Map to nearest palette color
+    // We can also do dithering here if we wanted, but for now just nearest neighbor
     color.rgb = mapToPalette(color.rgb);
+  }
+  // 3. Tint
+  else if (uColorMode == 3) {
+    float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    vec3 tintColor = hueToRGB(uTintHue);
+    color.rgb = tintColor * gray;
+  }
+  
+  // Fallback for uUsePalette if not in mode 2 (legacy support or mixed usage)
+  if (uUsePalette && uColorMode != 2) {
+     color.rgb = mapToPalette(color.rgb);
   }
   
   gl_FragColor = color;
