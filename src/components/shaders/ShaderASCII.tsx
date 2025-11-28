@@ -60,17 +60,27 @@ void main() {
   // 5. Sample Character Texture
   vec4 charColor = texture2D(uCharTexture, charUv);
   
-  // 6. Output
-  // If transparent: Alpha = charColor.r (assuming white text on black/transparent)
-  // If opaque: Mix black background with colored text
+  // 6. Final Color
+  // charColor.r is the mask (white text on black bg)
+  float mask = charColor.r;
   
-  vec3 finalColor = uColor * charColor.r;
+  vec3 finalColor = uColor * mask;
+  float alpha = 1.0;
   
-  if (uTransparent > 0.5) {
-     gl_FragColor = vec4(uColor, charColor.r);
+  // uTransparent: 0.0 = Black BG, 1.0 = Transparent BG, 2.0 = White BG
+  if (uTransparent > 1.5) {
+    // WHITE BACKGROUND
+    // If mask is 1 (text), use uColor. If mask is 0 (bg), use White.
+    finalColor = mix(vec3(1.0), uColor, mask);
+  } else if (uTransparent > 0.5) {
+    // TRANSPARENT BACKGROUND
+    alpha = mask;
   } else {
-     gl_FragColor = vec4(finalColor, 1.0);
+    // BLACK BACKGROUND (Default)
+    // Already set: finalColor is colored text on black (0,0,0)
   }
+
+  gl_FragColor = vec4(finalColor, alpha);
 }
 `
 
@@ -86,6 +96,7 @@ export function ShaderASCII() {
   const imageURL = useStore((state) => state.imageURL)
   const asciiDensity = useStore((state) => state.asciiDensity)
   const asciiColor = useStore((state) => state.asciiColor)
+  const asciiBgMode = useStore((state) => state.asciiBgMode)
   const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   
@@ -181,8 +192,29 @@ export function ShaderASCII() {
       materialRef.current.uniforms.uCharTexture.value = charTexture
       materialRef.current.uniforms.uDensity.value = asciiDensity
       materialRef.current.uniforms.uColor.value.set(asciiColor)
-      // Always use transparency for Terminal (export will always be transparent PNG)
-      materialRef.current.uniforms.uTransparent.value = 1.0
+      
+      // Update transparency based on mode
+      // 0.0 = Opaque (Black), 1.0 = Transparent, 2.0 = White (Need to update shader for this)
+      // For now, let's just toggle transparency. If White, we need shader support.
+      // Actually, let's keep shader simple: 
+      // If TRANSPARENT -> uTransparent = 1.0
+      // If BLACK -> uTransparent = 0.0
+      // If WHITE -> We need to handle this.
+      
+      // Let's update the shader code to handle background color properly.
+      // But for now, let's just map:
+      // TRANSPARENT -> 1.0
+      // BLACK -> 0.0
+      // WHITE -> 0.0 (but we need to change clear color? No, shader draws background)
+      
+      // Wait, the shader draws black background by default.
+      // Let's update shader code in next step.
+      // For now, pass mode as float: 0=Black, 1=Transparent, 2=White
+      let bgMode = 0.0
+      if (asciiBgMode === 'TRANSPARENT') bgMode = 1.0
+      if (asciiBgMode === 'WHITE') bgMode = 2.0
+      
+      materialRef.current.uniforms.uTransparent.value = bgMode
       materialRef.current.uniforms.uResolution.value.set(size.width, size.height)
     }
     
@@ -231,8 +263,17 @@ export function ShaderASCII() {
       if (!ctx) return
       
       // 4. Render Characters
-      // Clear with transparency
+      // Clear with correct background
       ctx.clearRect(0, 0, exportWidth, exportHeight)
+      
+      if (asciiBgMode === 'BLACK') {
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(0, 0, exportWidth, exportHeight)
+      } else if (asciiBgMode === 'WHITE') {
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, exportWidth, exportHeight)
+      }
+      // If TRANSPARENT, we just leave it cleared
       
       // Setup Font
       // Use a slightly smaller font size (0.65x) to match the look on screen and prevent clipping
@@ -296,7 +337,8 @@ export function ShaderASCII() {
        lastFittedTextureRef.current = texture.uuid
        
        const img = texture.image as HTMLImageElement
-       const padding = 0.9
+       // Use smaller padding to ensure full visibility (0.8 instead of 0.9)
+       const padding = 0.8
        const zoomWidth = (size.width * padding) / img.width
        const zoomHeight = (size.height * padding) / img.height
        const newZoom = Math.min(zoomWidth, zoomHeight)
@@ -307,7 +349,7 @@ export function ShaderASCII() {
        orthoCam.updateProjectionMatrix()
        
        if (controlsRef.current) {
-         controlsRef.current.minZoom = newZoom * 0.9
+         controlsRef.current.minZoom = newZoom * 0.5 // Allow zooming out more
          controlsRef.current.reset()
          controlsRef.current.object.zoom = newZoom
          controlsRef.current.object.updateProjectionMatrix()

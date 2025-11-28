@@ -125,6 +125,8 @@ export function LabOverlay() {
   
   const setAsciiDensity = useStore((state) => state.setAsciiDensity)
   const setAsciiColor = useStore((state) => state.setAsciiColor)
+  const asciiBgMode = useStore((state) => state.asciiBgMode)
+  const setAsciiBgMode = useStore((state) => state.setAsciiBgMode)
   
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
@@ -578,6 +580,45 @@ export function LabOverlay() {
                       background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'
                     }}
                   />
+                </div>
+
+                {/* Background Toggle */}
+                <div className="mb-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="font-medium uppercase text-xs">BACKGROUND</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setAsciiBgMode('BLACK')}
+                      className={`flex-1 px-3 py-2 font-bold text-xs uppercase transition-colors ${
+                        asciiBgMode === 'BLACK'
+                          ? 'bg-[#f27200] text-black'
+                          : 'bg-black text-[#f27200] border-2 border-[#f27200] hover:bg-[#f27200] hover:text-black'
+                      }`}
+                    >
+                      BLK
+                    </button>
+                    <button
+                      onClick={() => setAsciiBgMode('WHITE')}
+                      className={`flex-1 px-3 py-2 font-bold text-xs uppercase transition-colors ${
+                        asciiBgMode === 'WHITE'
+                          ? 'bg-[#f27200] text-black'
+                          : 'bg-black text-[#f27200] border-2 border-[#f27200] hover:bg-[#f27200] hover:text-black'
+                      }`}
+                    >
+                      WHT
+                    </button>
+                    <button
+                      onClick={() => setAsciiBgMode('TRANSPARENT')}
+                      className={`flex-1 px-3 py-2 font-bold text-xs uppercase transition-colors ${
+                        asciiBgMode === 'TRANSPARENT'
+                          ? 'bg-[#f27200] text-black'
+                          : 'bg-black text-[#f27200] border-2 border-[#f27200] hover:bg-[#f27200] hover:text-black'
+                      }`}
+                    >
+                      OFF
+                    </button>
+                  </div>
                 </div>
 
                 {/* Character Size Slider - 10 discrete steps from 5px to 20px */}

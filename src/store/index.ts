@@ -37,6 +37,7 @@ interface AppState {
   asciiDensity: number
   asciiColor: string
   asciiCharSet: 'alphanumeric' | 'special'
+  asciiBgMode: 'BLACK' | 'WHITE' | 'TRANSPARENT'
   
   isExporting: boolean
   exportFormat: 'PNG' | 'PNG_TRANSPARENT' | 'SVG'
@@ -68,7 +69,7 @@ interface AppState {
   
   setAsciiDensity: (density: number) => void
   setAsciiColor: (color: string) => void
-  setAsciiCharSet: (charSet: 'alphanumeric' | 'special') => void
+  setAsciiBgMode: (mode: 'BLACK' | 'WHITE' | 'TRANSPARENT') => void
   
   setIsExporting: (isExporting: boolean) => void
   setExportFormat: (format: 'PNG' | 'PNG_TRANSPARENT' | 'SVG') => void
@@ -140,6 +141,7 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   asciiDensity: 120,
   asciiColor: '#00ff00', // Default Green
   asciiCharSet: 'alphanumeric',
+  asciiBgMode: 'BLACK',
   
   // Datamosh stateen
   
@@ -216,7 +218,7 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   
   setAsciiDensity: (asciiDensity) => set({ asciiDensity }),
   setAsciiColor: (asciiColor) => set({ asciiColor }),
-  setAsciiCharSet: (asciiCharSet) => set({ asciiCharSet }),
+  setAsciiBgMode: (asciiBgMode) => set({ asciiBgMode }),
   
   setIsExporting: (isExporting) => set({ isExporting }),
   setExportFormat: (exportFormat) => set({ exportFormat }),
