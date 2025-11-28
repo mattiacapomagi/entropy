@@ -70,6 +70,14 @@ Rendering is performed using a single full-screen quad (`ScreenQuad`) with a cus
   - **Color Shift:** Invert colors of displaced blocks for a "corrupted file" aesthetic.
   - **Seed:** Randomize the noise pattern with a text seed (max 16 chars).
   - **Size Variation:** Randomly vary the size of individual blocks (non-uniform grid).
+- **Terminal Tool (ASCII):**
+  - **Procedural Rendering:** High-performance ASCII shader using 4096px character strips.
+  - **Character Size:** Intuitive slider to control text density/size.
+  - **Color Control:** Full Rainbow Hue slider + Hex input for precise styling.
+  - **Export Options:**
+    - **PNG:** Standard raster image (Black background).
+    - **PNG (Alpha):** Transparent background (ideal for overlays).
+    - **SVG:** Full vector export (text elements) for print/design.
 - **Palette System:** Custom 4-color palettes + Presets.
 - **State Persistence:** Reloading the page retains your settings and tool position.
 - **History:** Robust Undo/Redo system for all parameters.
