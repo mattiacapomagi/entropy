@@ -125,6 +125,8 @@ export function LabOverlay() {
   
   const setAsciiDensity = useStore((state) => state.setAsciiDensity)
   const setAsciiColor = useStore((state) => state.setAsciiColor)
+  const asciiCharSet = useStore((state) => state.asciiCharSet)
+  const setAsciiCharSet = useStore((state) => state.setAsciiCharSet)
   
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
@@ -578,6 +580,35 @@ export function LabOverlay() {
                       background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'
                     }}
                   />
+                </div>
+
+                {/* Character Set Toggle */}
+                <div className="mb-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="font-medium uppercase text-xs">CHARACTER SET</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setAsciiCharSet('alphanumeric')}
+                      className={`flex-1 px-3 py-2 font-bold text-xs uppercase transition-colors ${
+                        asciiCharSet === 'alphanumeric'
+                          ? 'bg-[#f27200] text-black'
+                          : 'bg-black text-[#f27200] border-2 border-[#f27200] hover:bg-[#f27200] hover:text-black'
+                      }`}
+                    >
+                      A-Z, 0-9
+                    </button>
+                    <button
+                      onClick={() => setAsciiCharSet('special')}
+                      className={`flex-1 px-3 py-2 font-bold text-xs uppercase transition-colors ${
+                        asciiCharSet === 'special'
+                          ? 'bg-[#f27200] text-black'
+                          : 'bg-black text-[#f27200] border-2 border-[#f27200] hover:bg-[#f27200] hover:text-black'
+                      }`}
+                    >
+                      + Symbols
+                    </button>
+                  </div>
                 </div>
 
                 {/* Character Size Slider - 10 discrete steps from 5px to 20px */}

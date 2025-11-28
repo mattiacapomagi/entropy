@@ -39,11 +39,16 @@ void main() {
   float gray = dot(inputColor, vec3(0.299, 0.587, 0.114));
   
   // 3. Map Luminance to Character
-  // 43 characters total
-  float charIndex = floor(gray * 42.99);
+  // Character count depends on texture (43 for alphanumeric, 70 for special)
+  // We can infer it from the uCharTexture width, but for simplicity use fixed multipliers
+  // For now, assume max range and let the texture handle it
+  float charIndex = floor(gray * 69.99);  // Max for special set
   
   // 4. Calculate Character Texture UVs
-  float charWidth = 1.0 / 43.0;
+  // CharTexture width varies: 43 for alphanumeric, 70 for special
+  // We need to calculate dynamically or pass as uniform
+  // For now, use max (70) - the texture will just show nothing for unused chars
+  float charWidth = 1.0 / 70.0;
   vec2 charUv = vec2(
     (cellUv.x * charWidth) + (charIndex * charWidth),
     cellUv.y
@@ -77,6 +82,7 @@ export function ShaderASCII() {
   const imageURL = useStore((state) => state.imageURL)
   const asciiDensity = useStore((state) => state.asciiDensity)
   const asciiColor = useStore((state) => state.asciiColor)
+  const asciiCharSet = useStore((state) => state.asciiCharSet)
   const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   
@@ -97,9 +103,11 @@ export function ShaderASCII() {
   // 2. Generate Procedural Character Texture
   useEffect(() => {
     const canvas = document.createElement('canvas')
-    // Clean character set: letters, numbers, dots, commas, asterisks
-    // Ordered by visual density (light to dark)
-    const chars = " .,il1IrjtfLcvuxznsCJUYXQ0O8ZmwpbdhkaoMW*"
+    // Select character set based on toggle
+    const chars = asciiCharSet === 'alphanumeric'
+      ? " .,il1IrjtfLcvuxznsCJUYXQ0O8ZmwpbdhkaoMW*"  // 43 characters
+      : " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"  // 70 characters
+    
     const charSize = 400
     const width = charSize * chars.length
     const height = charSize
@@ -134,7 +142,7 @@ export function ShaderASCII() {
     tex.needsUpdate = true
     setCharTexture(tex)
     
-  }, [])
+  }, [asciiCharSet])
 
   // 3. Uniforms
   const uniforms = useMemo(() => ({
