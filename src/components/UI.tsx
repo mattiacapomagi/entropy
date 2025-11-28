@@ -126,7 +126,6 @@ export function LabOverlay() {
   const setAsciiDensity = useStore((state) => state.setAsciiDensity)
   const setAsciiColor = useStore((state) => state.setAsciiColor)
   
-  const isExporting = useStore((state) => state.isExporting)
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
   const setIsFullscreen = useStore((state) => state.setIsFullscreen)
@@ -255,19 +254,6 @@ export function LabOverlay() {
           <div className="text-[#f27200] text-2xl md:text-3xl font-bold uppercase tracking-widest">
             {currentTool}
           </div>
-        </div>
-        
-        <div className="flex gap-4">
-          <button 
-            onClick={() => {
-              console.log('[EXPORT] Export button clicked, currentTool:', currentTool)
-              setIsExporting(true)
-            }}
-            disabled={isExporting}
-            className="bg-[#f27200] text-black px-4 py-1 text-sm font-bold hover:bg-white hover:text-black disabled:opacity-50 uppercase"
-          >
-            {isExporting ? 'SAVING...' : 'EXPORT'}
-          </button>
         </div>
       </div>
 
