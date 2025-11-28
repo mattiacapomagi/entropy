@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-type Tool = 'MENU' | 'DITHER' | 'DATAMOSH'
+export type Tool = 'MENU' | 'DITHER' | 'DATAMOSH' | 'TERMINAL'
 
 interface AppState {
   currentTool: Tool
@@ -33,6 +33,10 @@ interface AppState {
   dm_seed: string
   dm_size_variation: number
   
+  // Terminal State
+  asciiDensity: number
+  asciiColor: string
+  
   isExporting: boolean
   isFullscreen: boolean
   
@@ -59,6 +63,10 @@ interface AppState {
   setDmColorNoise: (noise: number) => void
   setDmSeed: (seed: string) => void
   setDmSizeVariation: (variation: number) => void
+  
+  setAsciiDensity: (density: number) => void
+  setAsciiColor: (color: string) => void
+  
   setIsExporting: (isExporting: boolean) => void
   setIsFullscreen: (isFullscreen: boolean) => void
   // History
@@ -93,6 +101,8 @@ const getHistoryState = (state: AppState): Partial<AppState> => ({
   dm_color_noise: state.dm_color_noise,
   dm_seed: state.dm_seed,
   dm_size_variation: state.dm_size_variation,
+  asciiDensity: state.asciiDensity,
+  asciiColor: state.asciiColor,
 })
 
 export const useStore = create<AppState>()(persist((set, get) => ({
@@ -122,6 +132,9 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   dm_color_noise: 0.0,
   dm_seed: 'ENTROPY',
   dm_size_variation: 0.0,
+  
+  asciiDensity: 120,
+  asciiColor: '#00ff00', // Default Green
   
   isExporting: false,
   isFullscreen: false,
@@ -193,6 +206,9 @@ export const useStore = create<AppState>()(persist((set, get) => ({
   setDmSeed: (seed) => set({ dm_seed: seed }),
   setDmSizeVariation: (variation) => set({ dm_size_variation: variation }),
   
+  setAsciiDensity: (density) => set({ asciiDensity: density }),
+  setAsciiColor: (color) => set({ asciiColor: color }),
+  
   setIsExporting: (isExporting) => set({ isExporting }),
   setIsFullscreen: (isFullscreen) => set({ isFullscreen }),
 }), {
@@ -220,5 +236,7 @@ export const useStore = create<AppState>()(persist((set, get) => ({
     dm_color_noise: state.dm_color_noise,
     dm_seed: state.dm_seed,
     dm_size_variation: state.dm_size_variation,
+    asciiDensity: state.asciiDensity,
+    asciiColor: state.asciiColor,
   })
 }))

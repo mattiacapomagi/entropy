@@ -97,7 +97,10 @@ export function LabOverlay() {
   const dm_color_noise = useStore((state) => state.dm_color_noise)
   const dm_seed = useStore((state) => state.dm_seed)
   const dm_size_variation = useStore((state) => state.dm_size_variation)
-
+  
+  const asciiDensity = useStore((state) => state.asciiDensity)
+  const asciiColor = useStore((state) => state.asciiColor)
+  
   const setDitherStrength = useStore((state) => state.setDitherStrength)
   const setDitherScale = useStore((state) => state.setDitherScale)
   const setDitherAlgorithm = useStore((state) => state.setDitherAlgorithm)
@@ -119,6 +122,9 @@ export function LabOverlay() {
   const setDmColorNoise = useStore((state) => state.setDmColorNoise)
   const setDmSeed = useStore((state) => state.setDmSeed)
   const setDmSizeVariation = useStore((state) => state.setDmSizeVariation)
+  
+  const setAsciiDensity = useStore((state) => state.setAsciiDensity)
+  const setAsciiColor = useStore((state) => state.setAsciiColor)
   
   const setIsExporting = useStore((state) => state.setIsExporting)
   const isFullscreen = useStore((state) => state.isFullscreen)
@@ -211,6 +217,13 @@ export function LabOverlay() {
               className="w-full bg-white text-black text-lg md:text-xl font-bold py-3 md:py-4 hover:bg-[#f27200] hover:text-white border-2 border-black uppercase tracking-wider"
             >
               DATAMOSH
+            </button>
+            
+            <button 
+              onClick={() => setCurrentTool('TERMINAL')}
+              className="w-full bg-white text-black text-lg md:text-xl font-bold py-3 md:py-4 hover:bg-[#f27200] hover:text-white border-2 border-black uppercase tracking-wider"
+            >
+              TERMINAL
             </button>
             
             <button 
@@ -406,8 +419,8 @@ export function LabOverlay() {
               )}
             </div>
 
-            {/* ADJUST - Hide in Datamosh mode */}
-            {currentTool !== 'DATAMOSH' && (
+            {/* ADJUST - Hide in Datamosh and Terminal mode */}
+            {currentTool !== 'DATAMOSH' && currentTool !== 'TERMINAL' && (
             <div className="border-2 border-[#f27200] p-3 bg-black text-white">
               <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-[#f27200] pb-2">
                 ADJUST
@@ -526,6 +539,68 @@ export function LabOverlay() {
                     />
                   </div>
                 ))}
+              </div>
+            )}
+            
+            {/* TERMINAL CONTROLS */}
+            {currentTool === 'TERMINAL' && (
+              <div className="border-2 border-[#f27200] p-3 bg-[#00ff00] text-black mt-4">
+                <div className="text-base font-semibold mb-3 uppercase tracking-wide border-b-2 border-black pb-2">
+                  TERMINAL
+                </div>
+                
+                {/* Color Picker */}
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <label className="text-sm font-bold">COLOR</label>
+                    <input 
+                      type="color" 
+                      value={asciiColor}
+                      onChange={(e) => setAsciiColor(e.target.value)}
+                      className="w-6 h-6 p-0 border-0"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    {['#00ff00', '#ffb000', '#ffffff', '#ff0000', '#00ffff'].map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setAsciiColor(c)}
+                        className="w-6 h-6 border-2 border-black"
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Density Slider */}
+                <div className="mb-3">
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium uppercase text-xs">DENSITY</span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          pushToHistory()
+                          setAsciiDensity(120)
+                        }}
+                        className="text-[10px] font-bold uppercase text-black hover:text-white"
+                        style={{ opacity: asciiDensity === 120 ? 0 : 1, pointerEvents: asciiDensity === 120 ? 'none' : 'auto' }}
+                      >
+                        RESET
+                      </button>
+                      <span className="text-black font-semibold text-sm w-8 text-right">{asciiDensity.toFixed(0)}</span>
+                    </div>
+                  </div>
+                  <input
+                    type="range"
+                    min={10}
+                    max={2500}
+                    step={10}
+                    value={asciiDensity}
+                    onPointerDown={pushToHistory}
+                    onChange={(e) => setAsciiDensity(parseFloat(e.target.value))}
+                    className="w-full h-5 appearance-none bg-black border-2 border-black [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black"
+                  />
+                </div>
               </div>
             )}
             

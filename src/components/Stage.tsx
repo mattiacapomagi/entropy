@@ -2,6 +2,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useRef, useEffect, useState, useMemo, memo } from 'react'
 import * as THREE from 'three'
 import { useStore } from '../store'
+import { ShaderASCII } from './shaders/ShaderASCII'
 import { MapControls, OrthographicCamera } from '@react-three/drei'
 
 const vertexShader = `
@@ -678,6 +679,8 @@ const ScreenQuad = memo(function ScreenQuad() {
 })
 
 export function Stage() {
+  const currentTool = useStore((state) => state.currentTool)
+  
   return (
     <div className="absolute inset-0 w-full h-full flex">
       <div className="relative w-full h-full">
@@ -685,7 +688,7 @@ export function Stage() {
           gl={{ preserveDrawingBuffer: true, antialias: false }}
           dpr={[1, 1]}
         >
-          <ScreenQuad />
+          {currentTool === 'TERMINAL' ? <ShaderASCII /> : <ScreenQuad />}
         </Canvas>
       </div>
     </div>
