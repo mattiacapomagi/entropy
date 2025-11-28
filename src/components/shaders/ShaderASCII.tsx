@@ -148,8 +148,9 @@ export function ShaderASCII() {
     }
     
     const tex = new THREE.CanvasTexture(canvas)
-    tex.minFilter = THREE.LinearFilter // Linear is better for high-res downsampling
+    tex.minFilter = THREE.LinearMipmapLinearFilter // Use Mipmaps for smooth downscaling (anti-aliasing)
     tex.magFilter = THREE.LinearFilter
+    tex.generateMipmaps = true
     tex.needsUpdate = true
     setCharTexture(tex)
     
@@ -167,7 +168,7 @@ export function ShaderASCII() {
     uCharTexture: { value: null },
     uDensity: { value: 120 },
     uColor: { value: new THREE.Color(0x00ff00) },
-    uTransparent: { value: 0.0 },
+    uTransparent: { value: 1.0 },
     uResolution: { value: new THREE.Vector2(1, 1) },
     uCharCount: { value: 69.0 },
     uGridDims: { value: new THREE.Vector2(8, 9) }
@@ -199,8 +200,8 @@ export function ShaderASCII() {
       
       // Calculate export dimensions based on DENSITY to ensure character sharpness
       // We want each character to have enough pixels to look crisp.
-      // Target: 64 pixels per character width (high quality)
-      const pixelsPerChar = 64
+      // Target: 128 pixels per character width (Ultra High Quality)
+      const pixelsPerChar = 128
       const targetWidth = asciiDensity * pixelsPerChar
       
       // Calculate height based on aspect ratio
@@ -240,6 +241,11 @@ export function ShaderASCII() {
       const currentWidth = size.width
       const currentHeight = size.height
       gl.setSize(exportWidth, exportHeight, false)
+      
+      // CRITICAL: Update shader resolution uniform to match export size!
+      if (materialRef.current) {
+        materialRef.current.uniforms.uResolution.value.set(exportWidth, exportHeight)
+      }
       
       // Render at export size using export camera
       gl.render(scene, cam)
